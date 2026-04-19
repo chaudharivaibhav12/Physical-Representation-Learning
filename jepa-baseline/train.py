@@ -1,5 +1,18 @@
 """
 JEPA pretraining script — Option A (conv-JEPA baseline).
+FULLY ENHANCED VERSION WITH ALL FEATURES
+
+Features:
+✅ Professional W&B logging (24+ metrics)
+✅ Custom run names (via run_name parameter)
+✅ Experiment groups (via experiment_group parameter)
+✅ Auto-generated names (from hyperparameters)
+✅ Multiple W&B projects (via wandb_project parameter)
+✅ Loss statistics (std, min, max)
+✅ Gradient norm monitoring
+✅ Per-batch timing
+✅ Professional tags and notes
+✅ Weight/gradient histograms
 
 Training recipe (matches the reference paper for active_matter):
     - AdamW optimizer, lr=1e-3, weight_decay=0.05, betas=(0.9, 0.95)
@@ -8,19 +21,37 @@ Training recipe (matches the reference paper for active_matter):
     - num_frames=16 context + 16 target, non-overlapping
     - Batch size 8 per device, target global batch size 256 via grad accum
 
-Data interface:
-    The dataset (`ActiveMatterDataset`, or any user-provided dataset) must
-    return dicts with keys "context" and "target", each a tensor of shape
-    (C, T, H, W). The trainer handles batching and device transfer.
+Usage Examples:
+    # Example 1: Custom names
+    python train.py --config config.yaml \
+      experiment_group="lr-study" \
+      run_name="lr-1e3"
 
-Usage (single GPU):
-    python train.py --config config.yaml
+    # Example 2: Auto-generated names
+    python train.py --config config.yaml \
+      experiment_group="quick-tests" \
+      train.lr=1e-3
 
-Usage (multi-GPU with torchrun):
-    torchrun --nproc_per_node=4 train.py --config config.yaml
+    # Example 3: Different projects
+    python train.py --config config.yaml \
+      wandb_project="convjepa-lr-studies" \
+      experiment_group="main" \
+      run_name="lr-1e3"
 
-Config overrides via CLI (OmegaConf dotlist syntax):
-    python train.py --config config.yaml train.lr=5e-4 train.num_epochs=50
+    # Example 4: Production run
+    python train.py --config config.yaml \
+      wandb_project="convjepa-production" \
+      experiment_group="production" \
+      run_name="final-model-v1.0" \
+      notes="Submitted to paper"
+
+    # Example 5: Multiple seeds
+    for SEED in 42 43 44; do
+      python train.py --config config.yaml \
+        experiment_group="final-experiments" \
+        run_name="final-seed$SEED" \
+        seed=$SEED
+    done
 """
 
 from __future__ import annotations
@@ -57,9 +88,9 @@ from loss import vicreg_loss
 from scheduler import CosineWarmupLR
 
 
-# -----------------------------------------------------------------------------
+# ============================================================================
 # Distributed setup
-# -----------------------------------------------------------------------------
+# ============================================================================
 
 def ddp_setup() -> tuple[int, int, int]:
     """Initialize distributed process group if run under torchrun.
@@ -98,9 +129,104 @@ def reduce_scalar(x: torch.Tensor) -> torch.Tensor:
     return x
 
 
-# -----------------------------------------------------------------------------
+# ============================================================================
+# Gradient monitoring
+# ============================================================================
+
+def compute_gradient_norm(optimizer: torch.optim.Optimizer) -> float:
+    """
+    Compute total gradient norm across all parameters.
+    
+    Useful for detecting exploding/vanishing gradients.
+    Returns a float (scalar).
+    """
+    total_norm = 0.0
+    for param_group in optimizer.param_groups:
+        for p in param_group['params']:
+            if p.grad is not None:
+                param_norm = p.grad.data.norm(2)
+                total_norm += param_norm.item() ** 2
+    
+    total_norm = total_norm ** 0.5
+    return total_norm
+
+
+# ============================================================================
+# W&B Configuration (Approach C: Hybrid)
+# ============================================================================
+
+def generate_run_name(cfg, custom_name: str = None) -> str:
+    """
+    Generate a run name from config or use custom name.
+    
+    If custom_name is provided, uses that.
+    Otherwise, auto-generates from hyperparameters.
+    
+    Examples:
+        Custom: "my-important-run"
+        Auto-generated: "lr1e-03-bs8-seed42"
+    """
+    if custom_name:
+        return custom_name
+    
+    # Auto-generate from hyperparameters
+    lr = cfg.train.lr
+    bs = cfg.train.batch_size
+    seed = cfg.get('seed', 42)
+    
+    lr_str = f"{lr:.0e}".replace("+", "")
+    run_name = f"lr{lr_str}-bs{bs}-seed{seed}"
+    return run_name
+
+
+def get_wandb_config(cfg) -> dict:
+    """
+    Extract and generate W&B configuration from OmegaConf (Approach C: Hybrid).
+    
+    Provides sensible defaults while allowing full customization.
+    
+    Returns:
+        Dict with keys: project, name, group, tags, notes
+    """
+    # 1. W&B Project (can override with wandb_project param)
+    wandb_project = cfg.get("wandb_project", "physics-jepa-experiments")
+    
+    # 2. Run name (custom or auto-generated)
+    run_name = generate_run_name(cfg, cfg.get("run_name", None))
+    
+    # 3. Experiment group (for organizing runs in same project)
+    experiment_group = cfg.get("experiment_group", "default")
+    
+    # 4. Build tags for filtering
+    # Use .get() with default because some configs may not define dataset.name explicitly.
+    dataset_name = cfg.dataset.get("name", cfg.dataset.get("class_name", "unknown"))
+    tags = [
+        "convjepa",
+        dataset_name,
+        f"lr_{cfg.train.lr:.0e}",
+        f"bs_{cfg.train.batch_size}",
+        f"epochs_{cfg.train.num_epochs}",
+    ]
+    
+    # Optional: Add experiment type if specified
+    if cfg.get("experiment_type"):
+        tags.append(cfg.experiment_type)
+    
+    # 5. Notes (visible in W&B, useful for documentation)
+    notes = cfg.get("notes", f"Experiment: {experiment_group}")
+    
+    return {
+        "project": wandb_project,
+        "name": run_name,
+        "group": experiment_group,
+        "tags": tags,
+        "notes": notes,
+    }
+
+
+# ============================================================================
 # Data
-# -----------------------------------------------------------------------------
+# ============================================================================
 
 def build_dataloaders(cfg, rank: int, world_size: int) -> tuple[DataLoader, DataLoader]:
     """
@@ -155,9 +281,9 @@ def build_dataloaders(cfg, rank: int, world_size: int) -> tuple[DataLoader, Data
     return train_loader, val_loader
 
 
-# -----------------------------------------------------------------------------
+# ============================================================================
 # Trainer
-# -----------------------------------------------------------------------------
+# ============================================================================
 
 class JEPATrainer:
 
@@ -221,7 +347,6 @@ class JEPATrainer:
         # AMP
         self.use_amp = cfg.train.get("use_amp", True) and torch.cuda.is_available()
         self.amp_dtype = torch.bfloat16 if cfg.train.get("amp_dtype", "bf16") == "bf16" else torch.float16
-        # GradScaler is only needed for fp16; bf16 doesn't need it.
         self.scaler = (torch.amp.GradScaler("cuda")
                        if self.use_amp and self.amp_dtype == torch.float16 else None)
 
@@ -232,13 +357,48 @@ class JEPATrainer:
 
         # Logging
         self.log_every = cfg.train.get("report_every", 50)
-        if is_main_process() and _HAS_WANDB and not cfg.get("dry_run", False):
+        if is_main_process() and _HAS_WANDB and cfg.get("use_wandb", False) and not cfg.get("dry_run", False):
+            # Get W&B configuration (Approach C: Hybrid)
+            wb_config = get_wandb_config(cfg)
+            
+            # Pull team entity from config (required for NYU accounts where
+            # personal entities are disabled).
+            wb_entity = cfg.get("wandb_entity", None)
+            
+            # Print what we're logging
+            rprint(f"[wandb] entity='{wb_entity}' project='{wb_config['project']}' "
+                   f"group='{wb_config['group']}' run='{wb_config['name']}'")
+            
+            # Initialize W&B with custom configuration
             wandb.init(
-                project=cfg.get("wandb_project", "physics-jepa-baseline"),
-                name=cfg.run_name,
+                entity=wb_entity,
+                project=wb_config["project"],
+                name=wb_config["name"],
+                group=wb_config["group"],
                 config=OmegaConf.to_container(cfg, resolve=True),
+                tags=wb_config["tags"],
+                job_type="train",
+                notes=wb_config["notes"],
+                settings=wandb.Settings(
+                    system_metrics=True,
+                    log_model=False,
+                ),
             )
             self.wandb_run = wandb.run
+            
+            # Watch models for weight/gradient histograms
+            wandb.watch(
+                self.encoder,
+                log="all",
+                log_freq=max(1, self.log_every // 5),
+                idx=0,
+            )
+            wandb.watch(
+                self.predictor,
+                log="all",
+                log_freq=max(1, self.log_every // 5),
+                idx=1,
+            )
         else:
             self.wandb_run = None
 
@@ -249,8 +409,8 @@ class JEPATrainer:
         tgt = batch["target"].to(self.device, non_blocking=True)
 
         with torch.amp.autocast("cuda", enabled=self.use_amp, dtype=self.amp_dtype):
-            ctx_embed = self.encoder(ctx)   # (B, C, H, W)
-            tgt_embed = self.encoder(tgt)   # (B, C, H, W)
+            ctx_embed = self.encoder(ctx)
+            tgt_embed = self.encoder(tgt)
             pred = self.predictor(ctx_embed)
             loss_dict = vicreg_loss(
                 pred, tgt_embed,
@@ -297,8 +457,11 @@ class JEPATrainer:
         t0 = time.time()
         running: Dict[str, list] = defaultdict(list)
         micro_in_accum = 0
+        batch_times = []  # Track batch processing time
 
         for step, batch in enumerate(self.train_loader):
+            batch_start = time.time()
+            
             loss_dict = self._forward_loss(batch)
             loss = loss_dict["loss"] / self.grad_accum
 
@@ -307,11 +470,12 @@ class JEPATrainer:
             else:
                 loss.backward()
 
-            # Accumulate logging stats (undo /grad_accum for the logged scalar).
+            # Accumulate logging stats
             for k, v in loss_dict.items():
                 running[k].append(v.detach())
 
             micro_in_accum += 1
+            batch_times.append(time.time() - batch_start)
             is_update_step = (micro_in_accum == self.grad_accum) or (step + 1 == len(self.train_loader))
 
             if is_update_step:
@@ -336,13 +500,18 @@ class JEPATrainer:
 
                 # Logging
                 if self.global_step % self.log_every == 0:
-                    self._log_train(running, epoch, t0)
+                    avg_batch_time_ms = (sum(batch_times) / len(batch_times) * 1000
+                                        if batch_times else 0)
+                    self._log_train(running, epoch, t0, batch_time_ms=avg_batch_time_ms)
                     running.clear()
+                    batch_times = []
                     t0 = time.time()
 
         # Flush any remaining
         if running:
-            self._log_train(running, epoch, t0)
+            avg_batch_time_ms = (sum(batch_times) / len(batch_times) * 1000
+                                if batch_times else 0)
+            self._log_train(running, epoch, t0, batch_time_ms=avg_batch_time_ms)
 
     @torch.no_grad()
     def _validate(self, epoch: int) -> Dict[str, float]:
@@ -359,7 +528,7 @@ class JEPATrainer:
             for k, v in loss_dict.items():
                 agg[k].append(v.detach())
 
-        # Reduce across ranks.
+        # Reduce across ranks
         reduced: Dict[str, float] = {}
         for k, vals in agg.items():
             mean = torch.stack(vals).mean()
@@ -377,17 +546,46 @@ class JEPATrainer:
 
         return reduced
 
-    def _log_train(self, running: Dict[str, list], epoch: int, t0: float):
+    def _log_train(self, running: Dict[str, list], epoch: int, t0: float, 
+                   batch_time_ms: float = 0.0):
+        """Log training metrics to W&B and console with enhanced statistics."""
         metrics = {}
+        
+        # Enhanced loss statistics: mean, std, min, max
         for k, vals in running.items():
-            m = torch.stack(vals).mean()
+            vals_stacked = torch.stack(vals)
+            
+            # Mean
+            m = vals_stacked.mean()
             m = reduce_scalar(m)
             metrics[f"train/{k}"] = m.item()
+            
+            # Standard deviation
+            m_std = vals_stacked.std()
+            m_std = reduce_scalar(m_std)
+            metrics[f"train/{k}_std"] = m_std.item()
+            
+            # Min/Max
+            m_min = vals_stacked.min()
+            m_min = reduce_scalar(m_min)
+            metrics[f"train/{k}_min"] = m_min.item()
+            
+            m_max = vals_stacked.max()
+            m_max = reduce_scalar(m_max)
+            metrics[f"train/{k}_max"] = m_max.item()
 
         metrics["train/lr"] = self.scheduler.get_last_lr()
         metrics["epoch"] = epoch
         steps_per_sec = self.log_every / max(1e-6, time.time() - t0)
         metrics["train/steps_per_sec"] = steps_per_sec
+        
+        # Gradient norm
+        grad_norm = compute_gradient_norm(self.optimizer)
+        metrics["train/grad_norm"] = grad_norm
+        
+        # Batch timing
+        if batch_time_ms > 0:
+            metrics["train/batch_time_ms"] = batch_time_ms
 
         if is_main_process():
             msg = f"[train] epoch {epoch} step {self.global_step}/{self.total_steps} | "
@@ -395,7 +593,13 @@ class JEPATrainer:
             msg += f"repr={metrics['train/repr_loss']:.4f} "
             msg += f"std={metrics['train/std_loss']:.4f} "
             msg += f"cov={metrics['train/cov_loss']:.4f} | "
-            msg += f"lr={metrics['train/lr']:.2e} | {steps_per_sec:.2f} step/s"
+            msg += f"lr={metrics['train/lr']:.2e} | "
+            msg += f"grad={grad_norm:.2e} | "
+            msg += f"{steps_per_sec:.2f} step/s"
+            
+            if batch_time_ms > 0:
+                msg += f" | batch={batch_time_ms:.1f}ms"
+            
             rprint(msg)
             if self.wandb_run is not None:
                 self.wandb_run.log(metrics, step=self.global_step)
@@ -420,6 +624,17 @@ class JEPATrainer:
         path = self.out_path / f"epoch_{epoch}.pt"
         torch.save(ckpt, path)
         rprint(f"[ckpt ] saved {path}")
+        
+        # Log best checkpoint as W&B artifact
+        if is_best and self.wandb_run is not None:
+            artifact = wandb.Artifact(
+                name="jepa-best-checkpoint",
+                type="model",
+                description=f"Best checkpoint at epoch {epoch} (val_loss={self.best_val_loss:.4f})",
+            )
+            artifact.add_file(str(path), name="model.pt")
+            self.wandb_run.log_artifact(artifact)
+            rprint(f"[ckpt ] logged best checkpoint to W&B")
 
         latest = self.out_path / "latest.pt"
         torch.save(ckpt, latest)
@@ -444,9 +659,9 @@ class JEPATrainer:
         rprint(f"[ckpt ] resumed from {path} at epoch {self.epoch}, step {self.global_step}")
 
 
-# -----------------------------------------------------------------------------
+# ============================================================================
 # Entry point
-# -----------------------------------------------------------------------------
+# ============================================================================
 
 def main():
     parser = argparse.ArgumentParser()

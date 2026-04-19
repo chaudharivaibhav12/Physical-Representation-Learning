@@ -5,6 +5,8 @@ run_name: "activematter-convjepa-baseline"
 out_path: "./checkpoints"
 seed: 42
 wandb_project: "physics-jepa-baseline"
+wandb_entity: "vaibhavnyu-new-york-university" 
+use_wandb: true
 
 # ---------------------------------------------------------------------------
 # Dataset: we import the user's ActiveMatterDataset via Python introspection.
@@ -14,6 +16,7 @@ wandb_project: "physics-jepa-baseline"
 dataset:
   module: "active_matter_dataset"          # the .py filename, no extension
   class_name: "ActiveMatterDataset"      # the class inside that file
+  name: "active_matter"
   num_chans: 11
   num_frames: 16
   kwargs:
@@ -40,7 +43,7 @@ model:
 # Training
 # ---------------------------------------------------------------------------
 train:
-  num_epochs: 30
+  num_epochs: 15
   batch_size: 8                      # per device
   target_global_batch_size: 256      # grad accum to reach this
   num_workers: 4
@@ -54,11 +57,11 @@ train:
 
   # Schedule
   lr_scheduler: "cosine"
-  lr_scheduler_warmup_epochs: 2
+  lr_scheduler_warmup_epochs: 1
 
   # VICReg
   sim_coeff: 2.0
-  std_coeff: 40.0
+  std_coeff: 20.0
   cov_coeff: 2.0
   vicreg_chunks: 5
 
