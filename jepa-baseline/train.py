@@ -379,10 +379,6 @@ class JEPATrainer:
                 tags=wb_config["tags"],
                 job_type="train",
                 notes=wb_config["notes"],
-                settings=wandb.Settings(
-                    system_metrics=True,
-                    log_model=False,
-                ),
             )
             self.wandb_run = wandb.run
             
