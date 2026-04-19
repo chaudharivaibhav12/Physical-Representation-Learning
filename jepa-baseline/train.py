@@ -47,6 +47,11 @@ try:
 except ImportError:
     _HAS_WANDB = False
 
+import sys
+_DATASET_DIR = os.environ.get("JEPA_DATASET_DIR")
+if _DATASET_DIR:
+    sys.path.insert(0, _DATASET_DIR)
+
 from model import build_jepa, count_params
 from loss import vicreg_loss
 from scheduler import CosineWarmupLR

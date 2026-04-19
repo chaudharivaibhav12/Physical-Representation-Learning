@@ -12,15 +12,17 @@ wandb_project: "physics-jepa-baseline"
 # `class_name` if it differs. Extra arguments flow through as kwargs.
 # ---------------------------------------------------------------------------
 dataset:
-  module: "data"                     # e.g. "data" or "physics_jepa.data"
-  class_name: "ActiveMatterDataset"
+  module: "active_matter_dataset"          # the .py filename, no extension
+  class_name: "ActiveMatterDataset"      # the class inside that file
   num_chans: 11
-  num_frames: 16                     # context = target = 16 frames
+  num_frames: 16
   kwargs:
+    cache_dir: "/scratch/vc2836/DL/data/active_matter/cache"
     num_frames: 16
-    resolution: [224, 224]
-    noise_std: 1.0                   # Gaussian noise augmentation
-    # Add any other kwargs your dataset needs (data_dir, stride, etc.)
+    stride: 1
+    augment: true
+    noise_std: 1.0
+    return_physical_params: false
 
 # ---------------------------------------------------------------------------
 # Model: conv_small with 5 stages.
