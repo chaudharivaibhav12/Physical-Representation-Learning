@@ -11,7 +11,7 @@
 #SBATCH --requeue
 #SBATCH --output=/scratch/%u/logs/vicreg_%j.out
 #SBATCH --error=/scratch/%u/logs/vicreg_%j.err
-#SBATCH --mail-type=END
+#SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=sb10583@nyu.edu
 
 mkdir -p /scratch/sb10583/logs
@@ -33,3 +33,9 @@ singularity exec --bind /scratch --nv --overlay /scratch/sb10583/overlay-10GB-40
     cd /scratch/sb10583/Physical-Representation-Learning/vicreg-sarvesh-v1
     python -u train.py $RESUME_FLAG
 '
+
+# Auto-resubmit if preempted (non-zero exit = preemption or crash)
+if [ $? -ne 0 ]; then
+    echo "Job preempted or failed — resubmitting..."
+    sbatch /scratch/sb10583/Physical-Representation-Learning/vicreg-sarvesh-v1/submit.slurm
+fi
