@@ -2,33 +2,34 @@
 #SBATCH --job-name=vicreg_sarvesh_v1
 #SBATCH --account=csci_ga_2572-2026sp
 #SBATCH --partition=c12m85-a100-1
-#SBATCH --output=/scratch/sb10583/logs/%j_%x.out
-#SBATCH --error=/scratch/sb10583/logs/%j_%x.err
-#SBATCH --time=24:00:00
-#SBATCH --gres=gpu:a100:1
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --time=06:00:00
 #SBATCH --requeue
+#SBATCH --output=/scratch/%u/logs/vicreg_%j.out
+#SBATCH --error=/scratch/%u/logs/vicreg_%j.err
 #SBATCH --mail-type=END
 #SBATCH --mail-user=sb10583@nyu.edu
 
 mkdir -p /scratch/sb10583/logs
 mkdir -p /scratch/sb10583/checkpoints/vicreg
 
-singularity exec --bind /scratch --nv \
-  --overlay /scratch/sb10583/overlay-10GB-400K.ext3 \
+singularity exec --nv --overlay /scratch/sb10583/overlay-10GB-400K.ext3:rw \
   /share/apps/images/cuda12.1.1-cudnn8.9.0-devel-ubuntu22.04.2.sif \
-  /bin/bash -c "
-source /ext3/miniconda3/etc/profile.d/conda.sh
-export PATH=/home/sb10583/.local/bin:\$PATH
-conda activate base
+  /bin/bash -c '
+    source /ext3/miniconda3/etc/profile.d/conda.sh
+    conda activate base
 
-cd /scratch/sb10583/Physical-Representation-Learning/vicreg-sarvesh-v1
+    CKPT=/scratch/sb10583/checkpoints/vicreg/latest.pt
+    RESUME_FLAG=""
+    if [ -f "$CKPT" ]; then
+        RESUME_FLAG="--resume $CKPT"
+        echo "Resuming from $CKPT"
+    fi
 
-CKPT=/scratch/sb10583/checkpoints/vicreg/latest.pt
-if [ -f \"\$CKPT\" ]; then
-  echo 'Resuming from checkpoint: '\$CKPT
-  python3 train.py --resume \$CKPT
-else
-  echo 'Starting fresh training run'
-  python3 train.py
-fi
-"
+    cd /scratch/sb10583/Physical-Representation-Learning/vicreg-sarvesh-v1
+    python -u train.py $RESUME_FLAG
+'

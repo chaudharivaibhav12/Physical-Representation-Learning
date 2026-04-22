@@ -60,9 +60,9 @@ CONFIG = {
     "cov_weight":     1.0,
 
     # Training
-    "epochs":         100,
+    "epochs":         20,
     "batch_size":     4,              # per GPU
-    "target_batch":   64,             # effective batch via grad accum
+    "target_batch":   32,             # effective batch via grad accum
     "lr":             1e-3,
     "weight_decay":   0.05,
     "grad_clip":      1.0,
