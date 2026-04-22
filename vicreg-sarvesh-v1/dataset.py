@@ -53,6 +53,7 @@ class ActiveMatterVICReg(Dataset):
         crop_size:  int   = CROP_SIZE,
         noise_std:  float = 0.05,
         min_gap:    int   = MIN_TEMPORAL_GAP,
+        stride:     int   = 4,
     ):
         self.split     = split
         self.crop_size = crop_size
@@ -64,16 +65,19 @@ class ActiveMatterVICReg(Dataset):
         self.files = sorted(glob.glob(os.path.join(split_dir, "*.hdf5")))
         assert len(self.files) > 0, f"No HDF5 files found in {split_dir}"
 
-        # Index: one entry per unique simulation (file, sim_idx)
-        self.sims = []
+        # Index: sliding window over time — (file, sim_idx, anchor_start, alpha, zeta)
+        # anchor_start is the base position for view1; view2 is sampled far from it
+        self.samples = []
+        max_start = NUM_FRAMES_TOTAL - NUM_FRAMES_CLIP  # 65
         for fpath in self.files:
             alpha, zeta = self._parse_params(fpath)
             with h5py.File(fpath, "r") as f:
                 n_sims = f["t0_fields/concentration"].shape[0]
             for sim_idx in range(n_sims):
-                self.sims.append((fpath, sim_idx, alpha, zeta))
+                for start in range(0, max_start + 1, stride):
+                    self.samples.append((fpath, sim_idx, start, alpha, zeta))
 
-        print(f"[{split}] {len(self.files)} files → {len(self.sims)} simulations")
+        print(f"[{split}] {len(self.files)} files → {len(self.samples)} samples")
 
     # ──────────────────────────────────────────────────────────────────
     # Helpers
@@ -159,16 +163,24 @@ class ActiveMatterVICReg(Dataset):
     # ──────────────────────────────────────────────────────────────────
 
     def __len__(self) -> int:
-        return len(self.sims)
+        return len(self.samples)
 
     def __getitem__(self, idx: int) -> dict:
-        fpath, sim_idx, alpha, zeta = self.sims[idx]
+        fpath, sim_idx, anchor, alpha, zeta = self.samples[idx]
 
         if self.is_train:
-            s1, s2 = self._sample_two_starts()
+            # view1 anchored at sliding window position, view2 sampled far away
+            s1 = anchor
+            max_start = NUM_FRAMES_TOTAL - NUM_FRAMES_CLIP
+            for _ in range(50):
+                s2 = np.random.randint(0, max_start + 1)
+                if abs(s2 - s1) >= self.min_gap:
+                    break
+            else:
+                s2 = max_start - s1 if s1 < max_start // 2 else 0
         else:
-            # Val/test: deterministic clips from start and mid-point
-            s1 = 0
+            # Val/test: deterministic — anchor for view1, midpoint for view2
+            s1 = anchor
             s2 = (NUM_FRAMES_TOTAL - NUM_FRAMES_CLIP) // 2  # 32
 
         clip1 = self._load_clip(fpath, sim_idx, s1)   # (16, 11, 256, 256)
