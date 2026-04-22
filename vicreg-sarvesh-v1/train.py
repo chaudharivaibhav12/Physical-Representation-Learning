@@ -74,8 +74,8 @@ CONFIG = {
     "save_every":     5,
 
     # Logging
-    "wandb_project":  "sarvesh vit",
-    "wandb_entity":   "vaibhavnyu-new-york-university",
+    "wandb_project":  "DL",
+    "wandb_entity":   "sb10583-",
     "run_name":       "sarvesh v1",
     "log_every":      10,
 }
