@@ -38,8 +38,8 @@ CONFIG = {
     # Data
     "data_dir":       "/scratch/sb10583/data/data",
     "crop_size":      224,
-    "noise_std":      0.05,
-    "min_gap":        16,             # min temporal gap between two views
+    "noise_std":      1.0,
+    "stride":         4,
 
     # Model
     "in_channels":    11,
@@ -167,18 +167,18 @@ def train(args, cfg):
 
     # ── Datasets ──────────────────────────────────────────────────────
     train_dataset = ActiveMatterDataset(
-        data_dir  = cfg["data_dir"],
-        split     = "train",
-        crop_size = cfg["crop_size"],
-        noise_std = cfg["noise_std"],
-        min_gap   = cfg["min_gap"],
+        data_dir   = cfg["data_dir"],
+        split      = "train",
+        crop_size  = cfg["crop_size"],
+        noise_std  = cfg["noise_std"],
+        stride     = cfg["stride"],
     )
     val_dataset = ActiveMatterDataset(
-        data_dir  = cfg["data_dir"],
-        split     = "valid",
-        crop_size = cfg["crop_size"],
-        noise_std = 0.0,
-        min_gap   = cfg["min_gap"],
+        data_dir   = cfg["data_dir"],
+        split      = "valid",
+        crop_size  = cfg["crop_size"],
+        noise_std  = 0.0,
+        stride     = cfg["stride"],
     )
 
     train_sampler = DistributedSampler(train_dataset) if distributed else None
