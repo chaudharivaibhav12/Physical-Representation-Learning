@@ -56,7 +56,7 @@ CONFIG = {
 
     # VICReg loss
     "sim_weight":     25.0,
-    "var_weight":     40.0,
+    "var_weight":     25.0,
     "cov_weight":     1.0,
 
     # Training
