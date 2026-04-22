@@ -74,8 +74,8 @@ CONFIG = {
     "save_every":     5,
 
     # Logging
-    "wandb_project":  "DL",
-    "wandb_entity":   "sb10583",
+    "wandb_project":  "vicreg-active-matter",
+    "wandb_entity":   None,
     "run_name":       "sarvesh v1",
     "log_every":      10,
 }
@@ -262,12 +262,10 @@ def train(args, cfg):
     # ── W&B ───────────────────────────────────────────────────────────
     os.makedirs(cfg["out_dir"], exist_ok=True)
     if is_main and not args.dry_run:
-        wandb.init(
-            project = cfg["wandb_project"],
-            entity  = cfg["wandb_entity"],
-            name    = cfg["run_name"],
-            config  = cfg,
-        )
+        init_kwargs = dict(project=cfg["wandb_project"], name=cfg["run_name"], config=cfg)
+        if cfg["wandb_entity"]:
+            init_kwargs["entity"] = cfg["wandb_entity"]
+        wandb.init(**init_kwargs)
 
     # ── Training ──────────────────────────────────────────────────────
     for epoch in range(start_epoch, cfg["epochs"]):
