@@ -7,7 +7,7 @@
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
-#SBATCH --time=06:00:00
+#SBATCH --time=10:00:00
 #SBATCH --requeue
 #SBATCH --output=/scratch/%u/logs/vicreg_%j.out
 #SBATCH --error=/scratch/%u/logs/vicreg_%j.err
@@ -17,7 +17,7 @@
 mkdir -p /scratch/sb10583/logs
 mkdir -p /scratch/sb10583/checkpoints/vicreg
 
-singularity exec --nv --overlay /scratch/sb10583/overlay-10GB-400K.ext3:rw \
+singularity exec --bind /scratch --nv --overlay /scratch/sb10583/overlay-10GB-400K.ext3:rw \
   /share/apps/images/cuda12.1.1-cudnn8.9.0-devel-ubuntu22.04.2.sif \
   /bin/bash -c '
     source /ext3/miniconda3/etc/profile.d/conda.sh
