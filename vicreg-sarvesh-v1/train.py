@@ -27,7 +27,7 @@ from torch.cuda.amp import GradScaler
 import wandb
 
 from model   import VICReg
-from dataset import ActiveMatterVICReg
+from dataset import ActiveMatterDataset
 
 
 # ─────────────────────────────────────────────
@@ -166,14 +166,14 @@ def train(args, cfg):
     device  = torch.device(f"cuda:{rank}" if torch.cuda.is_available() else "cpu")
 
     # ── Datasets ──────────────────────────────────────────────────────
-    train_dataset = ActiveMatterVICReg(
+    train_dataset = ActiveMatterDataset(
         data_dir  = cfg["data_dir"],
         split     = "train",
         crop_size = cfg["crop_size"],
         noise_std = cfg["noise_std"],
         min_gap   = cfg["min_gap"],
     )
-    val_dataset = ActiveMatterVICReg(
+    val_dataset = ActiveMatterDataset(
         data_dir  = cfg["data_dir"],
         split     = "valid",
         crop_size = cfg["crop_size"],
