@@ -61,9 +61,9 @@ class ActiveMatterDataset(Dataset):
         assert len(self.files) > 0, f"No HDF5 files found in {self.data_dir}"
         print(f"[{split}] Found {len(self.files)} files")
 
-        # Build sample index: stride=1, window=16
-        # 81 frames, window=16 → max_start=65 → 66 windows per simulation
-        # 135 simulations × 66 = 8,910 ≈ 8,750 train samples
+        # Build sample index: stride=2, window=16
+        # 81 frames, window=16 → max_start=65 → 33 windows per simulation
+        # ~175 simulations × 33 = ~5,775 train samples — fits in spot instance time limit
         self.samples = []
         for fpath in self.files:
             alpha, zeta = self._parse_params(fpath)
@@ -73,7 +73,7 @@ class ActiveMatterDataset(Dataset):
 
             for sim_idx in range(num_sims):
                 max_start = num_tsteps - num_frames  # 81 - 16 = 65
-                for start in range(0, max_start + 1):  # stride=1
+                for start in range(0, max_start + 1, 2):  # stride=2
                     self.samples.append((fpath, sim_idx, start, alpha, zeta))
 
         print(f"[{split}] Total samples: {len(self.samples)}")
@@ -190,7 +190,7 @@ class ActiveMatterEval(Dataset):
                 num_tsteps = f["t0_fields/concentration"].shape[1]
             for sim_idx in range(num_sims):
                 max_start = num_tsteps - num_frames
-                for start in range(0, max_start + 1):  # stride=1
+                for start in range(0, max_start + 1, 2):  # stride=2
                     self.samples.append((fpath, sim_idx, start, alpha, zeta))
 
         print(f"[eval/{split}] {len(self.samples)} samples")
