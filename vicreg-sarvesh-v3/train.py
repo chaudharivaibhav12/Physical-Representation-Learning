@@ -71,6 +71,7 @@ CONFIG = {
     # Checkpointing
     "out_dir":        "/scratch/sb10583/checkpoints/vicreg-v3",
     "save_every":     5,
+    "save_every_steps": 50,   # save latest.pt mid-epoch to survive preemption
 
     # Logging
     "wandb_project":  "vicreg-active-matter-v3",
@@ -309,6 +310,13 @@ def train(args, cfg):
                     )
                     if not args.dry_run:
                         wandb.log({**metrics, "lr": lr, "epoch": epoch + 1}, step=global_step)
+
+                # Save latest.pt mid-epoch to survive spot preemption
+                if is_main and global_step % cfg["save_every_steps"] == 0:
+                    save_checkpoint(
+                        os.path.join(cfg["out_dir"], "latest.pt"),
+                        epoch, model, optimizer, scaler, best_val_loss, cfg,
+                    )
 
         # ── Validation ────────────────────────────────────────────────
         model.eval()
