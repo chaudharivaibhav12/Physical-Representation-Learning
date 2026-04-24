@@ -355,6 +355,10 @@ def train(args, cfg):
                 os.path.join(cfg["out_dir"], "latest.pt"),
                 epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg,
             )
+            save_checkpoint(
+                os.path.join(cfg["out_dir"], f"epoch_{epoch+1}.pt"),
+                epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg,
+            )
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 save_checkpoint(
@@ -362,11 +366,6 @@ def train(args, cfg):
                     epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg,
                 )
                 print("  ✓ New best model saved!\n")
-            if (epoch + 1) % cfg["save_every"] == 0:
-                save_checkpoint(
-                    os.path.join(cfg["out_dir"], f"epoch_{epoch+1}.pt"),
-                    epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg,
-                )
 
         if args.dry_run:
             print("[DRY RUN] Stopping after 1 epoch.")
