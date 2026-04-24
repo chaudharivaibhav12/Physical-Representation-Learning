@@ -115,10 +115,11 @@ def cleanup_distributed():
 # Checkpoint Utilities
 # ─────────────────────────────────────────────
 
-def save_checkpoint(path, epoch, model, optimizer, scaler, best_val_loss, cfg):
+def save_checkpoint(path, epoch, global_step, model, optimizer, scaler, best_val_loss, cfg):
     encoder = model.module.encoder if hasattr(model, "module") else model.encoder
     torch.save({
         "epoch":         epoch,
+        "global_step":   global_step,
         "encoder":       encoder.state_dict(),
         "model":         model.state_dict(),
         "optimizer":     optimizer.state_dict(),
@@ -134,7 +135,7 @@ def load_checkpoint(path, model, optimizer, scaler, device):
     model.load_state_dict(ckpt["model"])
     optimizer.load_state_dict(ckpt["optimizer"])
     scaler.load_state_dict(ckpt["scaler"])
-    return ckpt["epoch"], ckpt.get("best_val_loss", float("inf"))
+    return ckpt["epoch"], ckpt.get("global_step", 0), ckpt.get("best_val_loss", float("inf"))
 
 
 # ─────────────────────────────────────────────
@@ -252,10 +253,9 @@ def train(args, cfg):
     if args.resume and os.path.exists(args.resume):
         if is_main:
             print(f"[RESUME] Loading: {args.resume}")
-        start_epoch, best_val_loss = load_checkpoint(args.resume, model, optimizer, scaler, device)
-        global_step = start_epoch * steps_per_epoch
+        start_epoch, global_step, best_val_loss = load_checkpoint(args.resume, model, optimizer, scaler, device)
         if is_main:
-            print(f"[RESUME] Resuming from epoch {start_epoch}\n")
+            print(f"[RESUME] Resuming from epoch {start_epoch}, global_step {global_step}\n")
 
     # ── W&B ───────────────────────────────────────────────────────────
     os.makedirs(cfg["out_dir"], exist_ok=True)
@@ -315,7 +315,7 @@ def train(args, cfg):
                 if is_main and global_step % cfg["save_every_steps"] == 0:
                     save_checkpoint(
                         os.path.join(cfg["out_dir"], "latest.pt"),
-                        epoch, model, optimizer, scaler, best_val_loss, cfg,
+                        epoch, global_step, model, optimizer, scaler, best_val_loss, cfg,
                     )
 
         # ── Validation ────────────────────────────────────────────────
@@ -353,19 +353,19 @@ def train(args, cfg):
             # Checkpoints
             save_checkpoint(
                 os.path.join(cfg["out_dir"], "latest.pt"),
-                epoch + 1, model, optimizer, scaler, best_val_loss, cfg,
+                epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg,
             )
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 save_checkpoint(
                     os.path.join(cfg["out_dir"], "best.pt"),
-                    epoch + 1, model, optimizer, scaler, best_val_loss, cfg,
+                    epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg,
                 )
                 print("  ✓ New best model saved!\n")
             if (epoch + 1) % cfg["save_every"] == 0:
                 save_checkpoint(
                     os.path.join(cfg["out_dir"], f"epoch_{epoch+1}.pt"),
-                    epoch + 1, model, optimizer, scaler, best_val_loss, cfg,
+                    epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg,
                 )
 
         if args.dry_run:
