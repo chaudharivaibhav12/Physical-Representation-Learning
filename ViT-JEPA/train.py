@@ -310,7 +310,7 @@ def train(args, cfg):
                     pg["lr"] = lr
 
                 scaler.unscale_(optimizer)
-                nn.utils.clip_grad_norm_(model.parameters(), cfg["grad_clip"])
+                grad_norm = nn.utils.clip_grad_norm_(model.parameters(), cfg["grad_clip"]).item()
 
                 scaler.step(optimizer)
                 scaler.update()
@@ -327,10 +327,11 @@ def train(args, cfg):
                         f"Loss {metrics['loss_total']:.4f} | "
                         f"Inv {metrics['loss_invariance']:.4f} | "
                         f"Var {metrics['loss_variance']:.4f} | "
-                        f"Cov {metrics['loss_covariance']:.4f}"
+                        f"Cov {metrics['loss_covariance']:.4f} | "
+                        f"GradNorm {grad_norm:.3f}"
                     )
                     if not args.dry_run:
-                        wandb.log({**metrics, "lr": lr, "epoch": epoch + 1}, step=global_step)
+                        wandb.log({**metrics, "lr": lr, "grad_norm": grad_norm, "epoch": epoch + 1}, step=global_step)
 
         # ── Validation ───────────────────────────────────────────────
         model.eval()
@@ -361,6 +362,7 @@ def train(args, cfg):
             )
             if not args.dry_run:
                 wandb.log({
+                    "train_loss":    avg_train,
                     "val_loss":      val_loss,
                     "embedding_std": emb_std,
                     "epoch":         epoch + 1,
