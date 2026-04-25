@@ -116,36 +116,6 @@ def load_checkpoint(path, model, optimizer, scaler, device):
     return start_epoch, global_step, best_val_loss
 
 
-# ─────────────────────────────────────────────
-# WandB: persist run ID across preemptions
-# ─────────────────────────────────────────────
-
-def init_wandb(cfg, dry_run):
-    if dry_run:
-        return
-    os.makedirs(cfg["out_dir"], exist_ok=True)
-    wandb_id_file = os.path.join(cfg["out_dir"], "wandb_run_id.txt")
-
-    if os.path.exists(wandb_id_file):
-        with open(wandb_id_file, "r") as f:
-            run_id = f.read().strip()
-        print(f"Resuming wandb run: {run_id}")
-        wandb.init(
-            project = cfg["wandb_project"],
-            name    = cfg["run_name"],
-            id      = run_id,
-            resume  = "must",
-            config  = cfg,
-        )
-    else:
-        run = wandb.init(
-            project = cfg["wandb_project"],
-            name    = cfg["run_name"],
-            config  = cfg,
-        )
-        with open(wandb_id_file, "w") as f:
-            f.write(run.id)
-        print(f"Started new wandb run: {run.id}")
 
 
 # ─────────────────────────────────────────────
@@ -160,7 +130,12 @@ def main(args):
     num_workers = 4 if torch.cuda.is_available() else 0
     pin_memory  = torch.cuda.is_available()
 
-    init_wandb(CFG, args.dry_run)
+    if not args.dry_run:
+        wandb.init(
+            project = CFG["wandb_project"],
+            name    = CFG["run_name"],
+            config  = CFG,
+        )
 
     # ── Datasets ─────────────────────────────────────────────────────
     train_ds = ActiveMatterDataset(
