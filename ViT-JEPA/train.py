@@ -82,7 +82,7 @@ CONFIG = {
     # Logging
     "wandb_project":     "active-matter-jepa",
     "run_name":          "vit-jepa-v2-d384-p32",
-    "log_every":         10,
+    "log_every":         1,
 }
 
 
@@ -277,11 +277,21 @@ def train(args, cfg):
     # ── WandB ────────────────────────────────────────────────────────
     os.makedirs(cfg["out_dir"], exist_ok=True)
     if is_main and not args.dry_run:
+        wandb_id_file = os.path.join(cfg["out_dir"], "wandb_run_id.txt")
+        if os.path.exists(wandb_id_file):
+            with open(wandb_id_file) as f:
+                wandb_run_id = f.read().strip()
+        else:
+            wandb_run_id = wandb.util.generate_id()
+            with open(wandb_id_file, "w") as f:
+                f.write(wandb_run_id)
         wandb.init(
             project = cfg["wandb_project"],
             entity  = cfg.get("wandb_entity"),
             name    = cfg["run_name"],
             config  = cfg,
+            id      = wandb_run_id,
+            resume  = "allow",
         )
 
     # ── Training ─────────────────────────────────────────────────────
