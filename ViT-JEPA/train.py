@@ -283,14 +283,19 @@ def train(args, cfg):
             wandb_run_id = wandb.util.generate_id()
             with open(wandb_id_file, "w") as f:
                 f.write(wandb_run_id)
-        wandb.init(
-            project = cfg["wandb_project"],
-            entity  = cfg.get("wandb_entity"),
-            name    = cfg["run_name"],
-            config  = cfg,
-            id      = wandb_run_id,
-            resume  = "allow",
-        )
+        try:
+            wandb.init(
+                project  = cfg["wandb_project"],
+                entity   = cfg.get("wandb_entity"),
+                name     = cfg["run_name"],
+                config   = cfg,
+                id       = wandb_run_id,
+                resume   = "allow",
+                settings = wandb.Settings(init_timeout=180),
+            )
+        except Exception as e:
+            print(f"[WANDB] Init failed ({e}), continuing without wandb.")
+            args.dry_run = True
 
     # ── Training ─────────────────────────────────────────────────────
     for epoch in range(start_epoch, cfg["epochs"]):
