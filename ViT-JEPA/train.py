@@ -185,6 +185,7 @@ def train(args, cfg):
         crop_size  = cfg["crop_size"],
         stride     = cfg["stride"],
         noise_std  = cfg["noise_std"],
+        cache_dir  = cfg.get("cache_dir"),
     )
     val_dataset = ActiveMatterDataset(
         data_dir   = cfg["data_dir"],
@@ -193,6 +194,7 @@ def train(args, cfg):
         crop_size  = cfg["crop_size"],
         stride     = cfg["stride"],
         noise_std  = 0.0,
+        cache_dir  = cfg.get("cache_dir"),
     )
 
     train_sampler = DistributedSampler(train_dataset) if distributed else None
@@ -393,8 +395,41 @@ def train(args, cfg):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--resume",  type=str, default=None)
-    parser.add_argument("--dry-run", action="store_true")
+
+    # Checkpointing
+    parser.add_argument("--resume",        type=str,   default=None)
+    parser.add_argument("--dry-run",       action="store_true")
+
+    # Paths (override CONFIG defaults)
+    parser.add_argument("--data-dir",      type=str,   default=None,
+                        help="Path to active_matter/data/")
+    parser.add_argument("--out-dir",       type=str,   default=None,
+                        help="Directory to save checkpoints")
+    parser.add_argument("--cache-dir",     type=str,   default=None,
+                        help="Directory for per-sim .pt cache files")
+
+    # Training (override CONFIG defaults)
+    parser.add_argument("--epochs",        type=int,   default=None)
+    parser.add_argument("--batch-size",    type=int,   default=None)
+    parser.add_argument("--lr",            type=float, default=None)
+    parser.add_argument("--stride",        type=int,   default=None)
+
+    # Logging
+    parser.add_argument("--run-name",      type=str,   default=None)
+    parser.add_argument("--wandb-project", type=str,   default=None)
+
     args = parser.parse_args()
 
-    train(args, CONFIG)
+    # Apply CLI overrides to CONFIG
+    cfg = dict(CONFIG)
+    if args.data_dir:      cfg["data_dir"]       = args.data_dir
+    if args.out_dir:       cfg["out_dir"]         = args.out_dir
+    if args.cache_dir:     cfg["cache_dir"]       = args.cache_dir
+    if args.epochs:        cfg["epochs"]          = args.epochs
+    if args.batch_size:    cfg["batch_size"]      = args.batch_size
+    if args.lr:            cfg["lr"]              = args.lr
+    if args.stride:        cfg["stride"]          = args.stride
+    if args.run_name:      cfg["run_name"]        = args.run_name
+    if args.wandb_project: cfg["wandb_project"]   = args.wandb_project
+
+    train(args, cfg)
