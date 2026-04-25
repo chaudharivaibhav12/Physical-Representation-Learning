@@ -115,7 +115,7 @@ def cleanup_distributed():
 # Checkpoint Utilities
 # ─────────────────────────────────────────────
 
-def save_checkpoint(path, epoch, global_step, model, optimizer, scaler, best_val_loss, cfg):
+def save_checkpoint(path, epoch, global_step, model, optimizer, scaler, best_val_loss, cfg, wandb_run_id=None):
     encoder = model.module.encoder if hasattr(model, "module") else model.encoder
     torch.save({
         "epoch":         epoch,
@@ -126,6 +126,7 @@ def save_checkpoint(path, epoch, global_step, model, optimizer, scaler, best_val
         "scaler":        scaler.state_dict(),
         "best_val_loss": best_val_loss,
         "config":        cfg,
+        "wandb_run_id":  wandb_run_id,
     }, path)
     print(f"  Saved: {path}")
 
@@ -135,7 +136,7 @@ def load_checkpoint(path, model, optimizer, scaler, device):
     model.load_state_dict(ckpt["model"])
     optimizer.load_state_dict(ckpt["optimizer"])
     scaler.load_state_dict(ckpt["scaler"])
-    return ckpt["epoch"], ckpt.get("global_step", 0), ckpt.get("best_val_loss", float("inf"))
+    return ckpt["epoch"], ckpt.get("global_step", 0), ckpt.get("best_val_loss", float("inf")), ckpt.get("wandb_run_id", None)
 
 
 # ─────────────────────────────────────────────
@@ -249,21 +250,29 @@ def train(args, cfg):
     start_epoch   = 0
     best_val_loss = float("inf")
     global_step   = 0
+    wandb_run_id  = None
 
     if args.resume and os.path.exists(args.resume):
         if is_main:
             print(f"[RESUME] Loading: {args.resume}")
-        start_epoch, global_step, best_val_loss = load_checkpoint(args.resume, model, optimizer, scaler, device)
+        start_epoch, global_step, best_val_loss, wandb_run_id = load_checkpoint(args.resume, model, optimizer, scaler, device)
         if is_main:
-            print(f"[RESUME] Resuming from epoch {start_epoch}, global_step {global_step}\n")
+            print(f"[RESUME] Resuming from epoch {start_epoch}, global_step {global_step}, wandb_run_id {wandb_run_id}\n")
 
     # ── W&B ───────────────────────────────────────────────────────────
     os.makedirs(cfg["out_dir"], exist_ok=True)
     if is_main and not args.dry_run:
-        init_kwargs = dict(project=cfg["wandb_project"], name=cfg["run_name"], config=cfg)
+        init_kwargs = dict(
+            project = cfg["wandb_project"],
+            name    = cfg["run_name"],
+            config  = cfg,
+            id      = wandb_run_id,
+            resume  = "allow",
+        )
         if cfg["wandb_entity"]:
             init_kwargs["entity"] = cfg["wandb_entity"]
         wandb.init(**init_kwargs)
+        wandb_run_id = wandb.run.id
 
     # ── Training ──────────────────────────────────────────────────────
     for epoch in range(start_epoch, cfg["epochs"]):
@@ -315,7 +324,7 @@ def train(args, cfg):
                 if is_main and global_step % cfg["save_every_steps"] == 0:
                     save_checkpoint(
                         os.path.join(cfg["out_dir"], "latest.pt"),
-                        epoch, global_step, model, optimizer, scaler, best_val_loss, cfg,
+                        epoch, global_step, model, optimizer, scaler, best_val_loss, cfg, wandb_run_id,
                     )
 
         # ── Validation ────────────────────────────────────────────────
@@ -353,17 +362,17 @@ def train(args, cfg):
             # Checkpoints
             save_checkpoint(
                 os.path.join(cfg["out_dir"], "latest.pt"),
-                epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg,
+                epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg, wandb_run_id,
             )
             save_checkpoint(
                 os.path.join(cfg["out_dir"], f"epoch_{epoch+1}.pt"),
-                epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg,
+                epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg, wandb_run_id,
             )
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 save_checkpoint(
                     os.path.join(cfg["out_dir"], "best.pt"),
-                    epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg,
+                    epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg, wandb_run_id,
                 )
                 print("  ✓ New best model saved!\n")
 
