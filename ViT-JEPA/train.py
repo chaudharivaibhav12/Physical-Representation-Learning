@@ -275,14 +275,6 @@ def train(args, cfg):
     # ── WandB ────────────────────────────────────────────────────────
     os.makedirs(cfg["out_dir"], exist_ok=True)
     if is_main and not args.dry_run:
-        wandb_id_file = os.path.join(cfg["out_dir"], "wandb_run_id.txt")
-        if os.path.exists(wandb_id_file):
-            with open(wandb_id_file) as f:
-                wandb_run_id = f.read().strip()
-        else:
-            wandb_run_id = wandb.util.generate_id()
-            with open(wandb_id_file, "w") as f:
-                f.write(wandb_run_id)
         print("[WANDB] Initializing...", flush=True)
         try:
             wandb.init(
@@ -290,9 +282,7 @@ def train(args, cfg):
                 entity   = cfg.get("wandb_entity"),
                 name     = cfg["run_name"],
                 config   = cfg,
-                id       = wandb_run_id,
-                resume   = "allow",
-                settings = wandb.Settings(init_timeout=180),
+                settings = wandb.Settings(init_timeout=60),
             )
             print("[WANDB] Initialized successfully.", flush=True)
         except Exception as e:
