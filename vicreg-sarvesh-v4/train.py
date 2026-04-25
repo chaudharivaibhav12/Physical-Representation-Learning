@@ -288,10 +288,16 @@ def main(args):
                 n_val    += 1
         val_loss /= max(n_val, 1)
 
-        # ── Collapse check ───────────────────────────────────────────
+        # ── Collapse check (10 batches for reliable estimate) ────────
+        model.eval()
         with torch.no_grad():
-            z       = model.encoder.forward_pooled(next(iter(val_loader))["view1"].to(device))
-            emb_std = z.std(dim=0).mean().item()
+            stds = []
+            for i, b in enumerate(val_loader):
+                if i >= 10:
+                    break
+                z = model.encoder.forward_pooled(b["view1"].to(device))
+                stds.append(z.std(dim=0).mean().item())
+            emb_std = sum(stds) / len(stds)
 
         avg_train = epoch_loss / max(n_batches, 1)
         print(f"\n── Epoch {epoch+1} ──────────────────────────────")
