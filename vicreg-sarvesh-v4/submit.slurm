@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=vicreg_sarvesh_v4
 #SBATCH --account=csci_ga_2572-2026sp
-#SBATCH --partition=c12m85-a100-1
+#SBATCH --partition=c24m170-a100-2
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --gpus-per-node=1
+#SBATCH --ntasks-per-node=2
+#SBATCH --gpus-per-node=2
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=32G
+#SBATCH --mem=64G
 #SBATCH --time=10:00:00
 #SBATCH --requeue
 #SBATCH --output=/scratch/sb10583/logs/vicreg_%j.out
@@ -42,5 +42,5 @@ singularity exec --bind /scratch --nv \
     source /ext3/miniconda3/etc/profile.d/conda.sh
     conda activate base
     cd /scratch/sb10583/Physical-Representation-Learning/vicreg-sarvesh-v4
-    python -u train.py $RESUME_FLAG
+    torchrun --nproc_per_node=2 train.py $RESUME_FLAG
   "
