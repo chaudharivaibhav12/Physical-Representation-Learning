@@ -46,6 +46,6 @@ singularity exec --nv --overlay /scratch/vc2836/overlay-physrep.ext3:rw \
         --lr            1e-3 \
         --stride        1 \
         --run-name      vit-jepa-v2-p32 \
-        --wandb-project active-matter-jepa \
+        --wandb-project active-matter-jepa-v2 \
         $RESUME_FLAG
 '
