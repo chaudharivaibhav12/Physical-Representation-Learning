@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=vit-jepa-v2-p32
 #SBATCH --account=csci_ga_2572-2026sp
-#SBATCH --partition=c12m85-a100-1
+#SBATCH --partition=c24m170-a100-2
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --gpus-per-node=1
+#SBATCH --ntasks-per-node=2
+#SBATCH --gpus-per-node=2
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=80G
+#SBATCH --mem=120G
 #SBATCH --time=12:00:00
 #SBATCH --requeue
 #SBATCH --output=/scratch/vc2836/DL/logs/vit_jepa_v2_p32_%j.out
@@ -42,7 +42,11 @@ singularity exec --nv --overlay /scratch/vc2836/overlay-physrep.ext3:rw \
         echo "Starting fresh training run"
     fi
 
-    python -u train.py \
+    torchrun \
+        --nproc_per_node=2 \
+        --rdzv_backend=c10d \
+        --rdzv_endpoint=localhost:29500 \
+        train.py \
         --data-dir      /scratch/vc2836/DL/data/active_matter/data \
         --out-dir       /scratch/vc2836/DL/checkpoints/vit_jepa_v2 \
         --epochs        100 \
