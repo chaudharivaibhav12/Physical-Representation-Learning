@@ -433,7 +433,7 @@ if __name__ == "__main__":
     cfg = dict(CONFIG)
     if args.data_dir:      cfg["data_dir"]       = args.data_dir
     if args.out_dir:       cfg["out_dir"]         = args.out_dir
-if args.epochs:        cfg["epochs"]          = args.epochs
+    if args.epochs:        cfg["epochs"]          = args.epochs
     if args.batch_size:    cfg["batch_size"]      = args.batch_size
     if args.lr:            cfg["lr"]              = args.lr
     if args.stride:        cfg["stride"]          = args.stride
