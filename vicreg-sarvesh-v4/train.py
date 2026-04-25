@@ -133,7 +133,10 @@ def save_checkpoint(path, epoch, global_step, model, optimizer, scaler, best_val
 
 def load_checkpoint(path, model, optimizer, scaler, device):
     ckpt = torch.load(path, map_location=device)
-    model.load_state_dict(ckpt["model"])
+    state_dict = ckpt["model"]
+    if all(k.startswith("module.") for k in state_dict):
+        state_dict = {k[len("module."):]: v for k, v in state_dict.items()}
+    model.load_state_dict(state_dict)
     optimizer.load_state_dict(ckpt["optimizer"])
     scaler.load_state_dict(ckpt["scaler"])
     return ckpt["epoch"], ckpt.get("global_step", 0), ckpt.get("best_val_loss", float("inf")), ckpt.get("wandb_run_id", None)
