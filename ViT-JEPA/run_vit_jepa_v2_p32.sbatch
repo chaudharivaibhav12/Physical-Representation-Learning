@@ -12,7 +12,7 @@
 #SBATCH --output=/scratch/vc2836/DL/logs/vit_jepa_v2_p32_%j.out
 #SBATCH --error=/scratch/vc2836/DL/logs/vit_jepa_v2_p32_%j.err
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=sb10583@nyu.edu
+#SBATCH --mail-user=vc2836@nyu.edu
 #SBATCH --signal=SIGUSR1@90
 
 handle_preemption() {
