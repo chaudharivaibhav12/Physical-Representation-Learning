@@ -203,16 +203,16 @@ def train(args, cfg):
         batch_size  = cfg["batch_size"],
         sampler     = train_sampler,
         shuffle     = (train_sampler is None),
-        num_workers = 4,
-        pin_memory  = True,
+        num_workers = 0,
+        pin_memory  = False,
         drop_last   = True,
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size  = cfg["batch_size"],
         shuffle     = False,
-        num_workers = 2,
-        pin_memory  = True,
+        num_workers = 0,
+        pin_memory  = False,
     )
 
     # ── Model ────────────────────────────────────────────────────────
