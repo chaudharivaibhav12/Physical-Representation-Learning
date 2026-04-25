@@ -279,6 +279,7 @@ def train(args, cfg):
     if is_main and not args.dry_run:
         wandb.init(
             project = cfg["wandb_project"],
+            entity  = cfg.get("wandb_entity"),
             name    = cfg["run_name"],
             config  = cfg,
         )
@@ -417,6 +418,7 @@ if __name__ == "__main__":
     # Logging
     parser.add_argument("--run-name",      type=str,   default=None)
     parser.add_argument("--wandb-project", type=str,   default=None)
+    parser.add_argument("--wandb-entity", type=str,   default=None)
 
     args = parser.parse_args()
 
@@ -431,5 +433,6 @@ if __name__ == "__main__":
     if args.stride:        cfg["stride"]          = args.stride
     if args.run_name:      cfg["run_name"]        = args.run_name
     if args.wandb_project: cfg["wandb_project"]   = args.wandb_project
+    if args.wandb_entity:  cfg["wandb_entity"]    = args.wandb_entity
 
     train(args, cfg)
