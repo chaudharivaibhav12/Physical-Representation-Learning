@@ -24,7 +24,6 @@ trap 'handle_preemption' SIGTERM SIGUSR1
 
 mkdir -p /scratch/vc2836/DL/logs
 mkdir -p /scratch/vc2836/DL/checkpoints/vit_jepa_v2
-mkdir -p /scratch/vc2836/DL/data/active_matter/data_vit_v2
 
 singularity exec --nv --overlay /scratch/vc2836/overlay-physrep.ext3:rw \
   /share/apps/images/cuda12.2.2-cudnn8.9.4-devel-ubuntu22.04.3.sif \
@@ -46,8 +45,7 @@ singularity exec --nv --overlay /scratch/vc2836/overlay-physrep.ext3:rw \
     python train.py \
         --data-dir      /scratch/vc2836/DL/data/active_matter/data \
         --out-dir       /scratch/vc2836/DL/checkpoints/vit_jepa_v2 \
-        --cache-dir     /scratch/vc2836/DL/data/active_matter/data_vit_v2 \
-        --epochs        100 \
+--epochs        100 \
         --batch-size    4 \
         --lr            1e-3 \
         --stride        1 \
