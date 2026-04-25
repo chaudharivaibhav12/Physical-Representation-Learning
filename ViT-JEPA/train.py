@@ -1,6 +1,11 @@
 """
-Training Script for ViT-JEPA on Active Matter Dataset
-======================================================
+Training Script for ViT-JEPA v2 on Active Matter Dataset
+=========================================================
+Changes from v1:
+  - stride: 4 → 1 (4x more temporal diversity, matches jepa-baseline)
+  - std_weight: 40 → 20 (stable with token-level VICReg)
+  - collapse monitoring now uses forward_pooled() to match eval representation
+
 Usage:
   Single GPU:
     python train.py
@@ -9,7 +14,7 @@ Usage:
     torchrun --nproc_per_node=4 train.py
 
   Resume from checkpoint:
-    python train.py --resume /scratch/ok2287/checkpoints/latest.pt
+    python train.py --resume /path/to/checkpoint.pt
 
   Dry run (1 epoch, no wandb):
     python train.py --dry-run
@@ -42,42 +47,42 @@ CONFIG = {
     "data_dir":          "/scratch/ok2287/data/active_matter/data",
     "num_frames":        16,
     "crop_size":         224,
-    "stride":            4,
+    "stride":            1,        # was 4; stride=1 gives ~4x more training windows
     "noise_std":         1.0,
 
-    # Model
+    # Model (v2)
     "in_channels":       11,
     "embed_dim":         384,
     "depth":             6,
     "num_heads":         6,
     "mlp_ratio":         4.0,
     "dropout":           0.0,
-    "patch_size":        32,
+    "patch_size":        32,       # 392 tokens (7x7x8)
     "tubelet":           2,
 
-    # VICReg
+    # VICReg (v2)
     "sim_weight":        2.0,
-    "std_weight":        40.0,
+    "std_weight":        20.0,     # was 40; stable with token-level VICReg
     "cov_weight":        2.0,
 
     # Training
     "epochs":            100,
-    "batch_size":        4,           # per GPU (small due to memory)
-    "target_batch":      256,         # effective global batch via grad accum
+    "batch_size":        4,
+    "target_batch":      256,
     "lr":                1e-3,
     "weight_decay":      0.05,
     "grad_clip":         1.0,
     "warmup_epochs":     5,
-    "amp_dtype":         "bf16",      # bf16 or fp16
+    "amp_dtype":         "bf16",
 
     # Checkpointing
-    "out_dir":           "/scratch/ok2287/checkpoints/vit_jepa",
-    "save_every":        5,           # save checkpoint every N epochs
+    "out_dir":           "/scratch/ok2287/checkpoints/vit_jepa_v2",
+    "save_every":        5,
 
     # Logging
     "wandb_project":     "active-matter-jepa",
-    "run_name":          "vit-jepa-d384-p32",
-    "log_every":         10,          # log every N steps
+    "run_name":          "vit-jepa-v2-d384-p32",
+    "log_every":         10,
 }
 
 
@@ -144,9 +149,9 @@ def load_checkpoint(path, model, optimizer, scaler, device):
 @torch.no_grad()
 def check_collapse(model, val_loader, device, n_batches=10):
     """
-    Check for representation collapse by computing
-    average std across embedding dimensions.
-    If std ≈ 0, the model has collapsed.
+    Checks for representation collapse using forward_pooled() — the same
+    representation used at evaluation time (linear probe / kNN).
+    Reports average std across embedding dimensions; < 0.1 signals collapse risk.
     """
     model.eval()
     enc = model.module.encoder if hasattr(model, "module") else model.encoder
@@ -156,8 +161,8 @@ def check_collapse(model, val_loader, device, n_batches=10):
         if i >= n_batches:
             break
         ctx = batch["context"].to(device)
-        z   = enc(ctx)                           # (B, D)
-        std = z.std(dim=0).mean().item()         # avg std across dims
+        z   = enc.forward_pooled(ctx)          # (B, D) — matches eval representation
+        std = z.std(dim=0).mean().item()
         stds.append(std)
 
     return sum(stds) / len(stds)
@@ -241,12 +246,10 @@ def train(args, cfg):
         weight_decay = cfg["weight_decay"],
     )
 
-    # Mixed precision
-    amp_dtype = torch.bfloat16 if cfg["amp_dtype"] == "bf16" else torch.float16
-    scaler    = GradScaler(enabled=(cfg["amp_dtype"] == "fp16"))
-
-    # Gradient accumulation steps
+    amp_dtype   = torch.bfloat16 if cfg["amp_dtype"] == "bf16" else torch.float16
+    scaler      = GradScaler(enabled=(cfg["amp_dtype"] == "fp16"))
     accum_steps = max(1, cfg["target_batch"] // (cfg["batch_size"] * world_size))
+
     if is_main:
         print(f"[TRAIN] Gradient accumulation steps: {accum_steps}")
         print(f"[TRAIN] Effective batch size: {cfg['batch_size'] * world_size * accum_steps}\n")
@@ -257,9 +260,9 @@ def train(args, cfg):
     warmup_steps    = cfg["warmup_epochs"] * steps_per_epoch
 
     # ── Resume ───────────────────────────────────────────────────────
-    start_epoch    = 0
-    best_val_loss  = float("inf")
-    global_step    = 0
+    start_epoch   = 0
+    best_val_loss = float("inf")
+    global_step   = 0
 
     if args.resume and os.path.exists(args.resume):
         if is_main:
@@ -292,22 +295,17 @@ def train(args, cfg):
             ctx = batch["context"].to(device, non_blocking=True)
             tgt = batch["target"].to(device,  non_blocking=True)
 
-            # Forward pass with mixed precision
             with torch.autocast(device_type="cuda", dtype=amp_dtype):
                 loss, metrics = model(ctx, tgt)
                 loss = loss / accum_steps
 
-            # Backward
             scaler.scale(loss).backward()
 
-            # Optimizer step every accum_steps
             if (step + 1) % accum_steps == 0:
-                # Update LR
                 lr = get_lr(global_step, total_steps, warmup_steps, cfg["lr"])
                 for pg in optimizer.param_groups:
                     pg["lr"] = lr
 
-                # Gradient clipping
                 scaler.unscale_(optimizer)
                 nn.utils.clip_grad_norm_(model.parameters(), cfg["grad_clip"])
 
@@ -319,7 +317,6 @@ def train(args, cfg):
                 epoch_loss += metrics["loss_total"]
                 n_batches  += 1
 
-                # Logging
                 if is_main and global_step % cfg["log_every"] == 0:
                     print(
                         f"Epoch {epoch+1:3d} | Step {global_step:5d} | "
@@ -347,16 +344,17 @@ def train(args, cfg):
 
         val_loss /= max(n_val, 1)
 
-        # Check for collapse
+        # Collapse check on pooled embeddings (matches eval representation)
         emb_std = check_collapse(model, val_loader, device)
 
         if is_main:
             avg_train = epoch_loss / max(n_batches, 1)
+            collapse_status = "⚠ COLLAPSE RISK" if emb_std < 0.1 else "✓ healthy"
             print(
                 f"\n── Epoch {epoch+1} Summary ──────────────────────────\n"
                 f"  Train Loss:    {avg_train:.4f}\n"
                 f"  Val Loss:      {val_loss:.4f}\n"
-                f"  Embedding Std: {emb_std:.4f}  {'⚠ COLLAPSE RISK' if emb_std < 0.1 else '✓ healthy'}\n"
+                f"  Embedding Std: {emb_std:.4f}  {collapse_status}\n"
             )
             if not args.dry_run:
                 wandb.log({
@@ -365,7 +363,6 @@ def train(args, cfg):
                     "epoch":         epoch + 1,
                 }, step=global_step)
 
-            # Save checkpoints
             latest_path = os.path.join(cfg["out_dir"], "latest.pt")
             save_checkpoint(latest_path, epoch + 1, model, optimizer, scaler, best_val_loss, cfg)
 
@@ -396,8 +393,8 @@ def train(args, cfg):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--resume",  type=str, default=None, help="Path to checkpoint to resume from")
-    parser.add_argument("--dry-run", action="store_true",    help="Run 1 epoch without wandb")
+    parser.add_argument("--resume",  type=str, default=None)
+    parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
     train(args, CONFIG)
