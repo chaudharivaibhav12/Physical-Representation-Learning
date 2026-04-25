@@ -43,14 +43,14 @@ CFG = {
     "data_dir":       "/scratch/ok2287/data/active_matter/data",
     "num_frames":     16,
     "crop_size":      224,
-    "stride":         4,
+    "stride":         1,
     "noise_std":      1.0,
 
     # Model
     "embed_dim":      384,
-    "depth":          6,
+    "depth":          8,
     "num_heads":      6,
-    "patch_size":     16,
+    "patch_size":     32,
     "tubelet":        2,
 
     # Predictor

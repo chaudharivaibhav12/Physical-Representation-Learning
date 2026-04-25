@@ -51,7 +51,7 @@ CFG = {
     "embed_dim":     384,
     "depth":         6,
     "num_heads":     6,
-    "patch_size":    16,
+    "patch_size":    32,
     "tubelet":       2,
     "predictor_dim": 192,
     "pred_depth":    2,
