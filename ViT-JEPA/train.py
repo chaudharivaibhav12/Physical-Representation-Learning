@@ -283,6 +283,7 @@ def train(args, cfg):
             wandb_run_id = wandb.util.generate_id()
             with open(wandb_id_file, "w") as f:
                 f.write(wandb_run_id)
+        print("[WANDB] Initializing...", flush=True)
         try:
             wandb.init(
                 project  = cfg["wandb_project"],
@@ -293,8 +294,9 @@ def train(args, cfg):
                 resume   = "allow",
                 settings = wandb.Settings(init_timeout=180),
             )
+            print("[WANDB] Initialized successfully.", flush=True)
         except Exception as e:
-            print(f"[WANDB] Init failed ({e}), continuing without wandb.")
+            print(f"[WANDB] Init failed ({e}), continuing without wandb.", flush=True)
             args.dry_run = True
 
     # ── Training ─────────────────────────────────────────────────────

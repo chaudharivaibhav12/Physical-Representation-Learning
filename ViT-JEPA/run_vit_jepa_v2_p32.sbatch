@@ -42,10 +42,10 @@ singularity exec --nv --overlay /scratch/vc2836/overlay-physrep.ext3:rw \
         echo "Starting fresh training run"
     fi
 
-    python train.py \
+    python -u train.py \
         --data-dir      /scratch/vc2836/DL/data/active_matter/data \
         --out-dir       /scratch/vc2836/DL/checkpoints/vit_jepa_v2 \
---epochs        100 \
+        --epochs        100 \
         --batch-size    4 \
         --lr            1e-3 \
         --stride        1 \
