@@ -44,7 +44,7 @@ from dataset import ActiveMatterDataset
 
 CONFIG = {
     # Data
-    "data_dir":          "/scratch/ok2287/data/active_matter/data",
+    "data_dir":          "/scratch/vc2836/DL/data/active_matter/data",
     "num_frames":        16,
     "crop_size":         224,
     "stride":            1,        # was 4; stride=1 gives ~4x more training windows
@@ -76,7 +76,7 @@ CONFIG = {
     "amp_dtype":         "bf16",
 
     # Checkpointing
-    "out_dir":           "/scratch/ok2287/checkpoints/vit_jepa_v2",
+    "out_dir":           "/scratch/vc2836/DL/checkpoints/vit_jepa_v2",
     "save_every":        5,
 
     # Logging

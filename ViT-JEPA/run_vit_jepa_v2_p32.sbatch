@@ -1,0 +1,41 @@
+#!/bin/bash
+#SBATCH --job-name=vit-jepa-v2-p32
+#SBATCH --account=csci_ga_2572-2026sp
+#SBATCH --partition=c24m170-a100-2
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=2
+#SBATCH --gpus-per-node=2
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=120G
+#SBATCH --time=12:00:00
+#SBATCH --requeue
+#SBATCH --output=/scratch/vc2836/DL/logs/vit_jepa_v2_p32_%j.out
+#SBATCH --error=/scratch/vc2836/DL/logs/vit_jepa_v2_p32_%j.err
+
+mkdir -p /scratch/vc2836/DL/logs
+mkdir -p /scratch/vc2836/DL/checkpoints/vit_jepa_v2
+
+singularity exec --nv --overlay /scratch/vc2836/overlay-physrep.ext3:rw \
+  /share/apps/images/cuda12.2.2-cudnn8.9.4-devel-ubuntu22.04.sif \
+  /bin/bash -c '
+    source /ext3/miniconda3/etc/profile.d/conda.sh
+    conda activate physrep
+
+    cd /scratch/vc2836/DL/Physical-Representation-Learning/ViT-JEPA
+
+    CKPT_DIR=/scratch/vc2836/DL/checkpoints/vit_jepa_v2
+    RESUME_FLAG=""
+    if [ -f "$CKPT_DIR/latest.pt" ]; then
+        RESUME_FLAG="--resume $CKPT_DIR/latest.pt"
+        echo "Resuming from $CKPT_DIR/latest.pt"
+    else
+        echo "Starting fresh training run"
+    fi
+
+    torchrun \
+        --nproc_per_node=2 \
+        --rdzv_backend=c10d \
+        --rdzv_endpoint=localhost:29500 \
+        train.py \
+        $RESUME_FLAG
+'
