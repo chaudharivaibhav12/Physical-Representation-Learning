@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=vit-jepa-v2-p32
 #SBATCH --account=csci_ga_2572-2026sp
-#SBATCH --partition=c24m170-a100-2
+#SBATCH --partition=c12m85-a100-1
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=2
-#SBATCH --gpus-per-node=2
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=120G
+#SBATCH --mem=80G
 #SBATCH --time=12:00:00
 #SBATCH --requeue
 #SBATCH --output=/scratch/vc2836/DL/logs/vit_jepa_v2_p32_%j.out
@@ -17,7 +17,7 @@ mkdir -p /scratch/vc2836/DL/checkpoints/vit_jepa_v2
 mkdir -p /scratch/vc2836/DL/data/active_matter/data_vit_v2
 
 singularity exec --nv --overlay /scratch/vc2836/overlay-physrep.ext3:rw \
-  /share/apps/images/cuda12.2.2-cudnn8.9.4-devel-ubuntu22.04.sif \
+  /share/apps/images/cuda12.2.2-cudnn8.9.4-devel-ubuntu22.04.3.sif \
   /bin/bash -c '
     source /ext3/miniconda3/etc/profile.d/conda.sh
     conda activate physrep
@@ -33,11 +33,7 @@ singularity exec --nv --overlay /scratch/vc2836/overlay-physrep.ext3:rw \
         echo "Starting fresh training run"
     fi
 
-    torchrun \
-        --nproc_per_node=2 \
-        --rdzv_backend=c10d \
-        --rdzv_endpoint=localhost:29500 \
-        train.py \
+    python train.py \
         --data-dir      /scratch/vc2836/DL/data/active_matter/data \
         --out-dir       /scratch/vc2836/DL/checkpoints/vit_jepa_v2 \
         --cache-dir     /scratch/vc2836/DL/data/active_matter/data_vit_v2 \
@@ -48,4 +44,5 @@ singularity exec --nv --overlay /scratch/vc2836/overlay-physrep.ext3:rw \
         --run-name      vit-jepa-v2-p32 \
         --wandb-project active-matter-jepa-v2 \
         $RESUME_FLAG
+
 '
