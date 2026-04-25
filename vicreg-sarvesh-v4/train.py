@@ -108,7 +108,9 @@ def load_checkpoint(path, model, optimizer, scaler, device):
         state_dict = {k[len("module."):]: v for k, v in state_dict.items()}
     model.load_state_dict(state_dict)
     optimizer.load_state_dict(ckpt["optimizer"])
-    scaler.load_state_dict(ckpt["scaler"])
+    scaler_state = ckpt.get("scaler", {})
+    if scaler_state:
+        scaler.load_state_dict(scaler_state)
     start_epoch   = ckpt["epoch"]
     global_step   = ckpt.get("global_step", 0)
     best_val_loss = ckpt.get("best_val_loss", float("inf"))
