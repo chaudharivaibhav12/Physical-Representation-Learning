@@ -52,8 +52,8 @@ CFG = {
 
     # Training
     "epochs":         100,
-    "batch_size":     4,
-    "target_batch":   32,
+    "batch_size":     8,
+    "target_batch":   64,
     "lr":             1e-3,
     "weight_decay":   0.05,
     "grad_clip":      1.0,
