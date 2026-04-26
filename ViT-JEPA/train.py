@@ -460,12 +460,12 @@ def train(args, cfg):
                       f"({batches_to_skip} batches, {steps_done_this_epoch} opt steps) "
                       f"via OffsetSampler — no I/O cost", flush=True)
             epoch_sampler = OffsetSampler(
-                n      = len(train_ds),
+                n      = len(train_dataset),
                 offset = samples_to_skip,
                 seed   = 42 + epoch,
             )
             epoch_loader = DataLoader(
-                train_ds,
+                train_dataset,
                 batch_size  = cfg["batch_size"],
                 sampler     = epoch_sampler,
                 num_workers = num_workers,
