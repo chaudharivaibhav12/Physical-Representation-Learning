@@ -7,8 +7,8 @@ All fixes applied:
   3. SIGUSR1 signal handler saves checkpoint before preemption
   4. best_val_loss updated BEFORE saving latest.pt (fixes inf bug)
   5. batch_size=8, target_batch=64 (35 steps/epoch instead of 8)
-  6. WandB run ID persisted to file — resumes same run on restart
-     (clean continuous charts, no more crashed runs)
+  6. WandB run ID persisted to file (clean continuous charts)
+  7. Mid-epoch checkpointing and robust batch-skipping (Resumes exactly where it died)
 
 Usage:
   Fresh training:
@@ -64,8 +64,6 @@ CFG = {
     "cov_weight":     2.0,
 
     # Training
-    # batch_size=8 + target_batch=64 → accum=8 → ~35 steps/epoch
-    # (previously batch=4, target=256 → accum=64 → only 8 steps/epoch)
     "epochs":         100,
     "batch_size":     8,
     "target_batch":   64,
@@ -77,11 +75,12 @@ CFG = {
     # Checkpointing
     "out_dir":        "/scratch/ok2287/checkpoints/vit_jepa",
     "save_every":     5,
+    "save_steps":     50,     # Saves mid-epoch progress every 50 optimizer steps
 
     # Logging
     "log_every":      10,
     "wandb_project":  "active-matter-jepa",
-    "run_name":       "vit-jepa-d384-p16",
+    "run_name":       "vit-jepa-d384-p32-dep-8",
 }
 
 
@@ -100,10 +99,11 @@ def get_lr(step, total_steps, warmup_steps, base_lr, min_lr=1e-6):
 # Checkpoint Utilities
 # ─────────────────────────────────────────────
 
-def save_checkpoint(path, epoch, model, optimizer, scaler, best_val_loss):
+def save_checkpoint(path, epoch, global_step, model, optimizer, scaler, best_val_loss):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     torch.save({
         "epoch":         epoch,
+        "global_step":   global_step,
         "encoder":       model.encoder.state_dict(),
         "model":         model.state_dict(),
         "optimizer":     optimizer.state_dict(),
@@ -114,15 +114,18 @@ def save_checkpoint(path, epoch, model, optimizer, scaler, best_val_loss):
     print(f"  Saved: {path}")
 
 
-def load_checkpoint(path, model, optimizer, scaler, device):
+def load_checkpoint(path, model, optimizer, scaler, device, steps_per_ep):
     ckpt = torch.load(path, map_location=device)
     model.load_state_dict(ckpt["model"])
     optimizer.load_state_dict(ckpt["optimizer"])
     scaler.load_state_dict(ckpt["scaler"])
+    
     start_epoch   = ckpt["epoch"]
+    global_step   = ckpt.get("global_step", start_epoch * steps_per_ep)
     best_val_loss = ckpt.get("best_val_loss", float("inf"))
-    print(f"  Resumed from epoch {start_epoch}, best_val_loss={best_val_loss:.4f}")
-    return start_epoch, best_val_loss
+    
+    print(f"  Resumed from epoch {start_epoch}, step {global_step}, best_val_loss={best_val_loss:.4f}")
+    return start_epoch, global_step, best_val_loss
 
 
 # ─────────────────────────────────────────────
@@ -130,11 +133,6 @@ def load_checkpoint(path, model, optimizer, scaler, device):
 # ─────────────────────────────────────────────
 
 def init_wandb(cfg, dry_run):
-    """
-    Initialize WandB, resuming the same run if it exists.
-    Saves run ID to a file so preempted jobs resume the same run
-    instead of creating new crashed runs.
-    """
     if dry_run:
         return
 
@@ -172,13 +170,10 @@ def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
 
-    # ── Auto-detect workers and pin_memory ───────────────────────────
-    # num_workers=0 on CPU avoids worker OOM kills during dry run
     num_workers = 4 if torch.cuda.is_available() else 0
     pin_memory  = torch.cuda.is_available()
     print(f"num_workers={num_workers}, pin_memory={pin_memory}")
 
-    # ── WandB ────────────────────────────────────────────────────────
     init_wandb(CFG, args.dry_run)
 
     # ── Datasets ─────────────────────────────────────────────────────
@@ -239,7 +234,6 @@ def main(args):
         weight_decay = CFG["weight_decay"],
     )
 
-    # ── GradScaler (fixed deprecation) ───────────────────────────────
     scaler = torch.amp.GradScaler('cuda', enabled=torch.cuda.is_available())
 
     # ── Gradient accumulation ────────────────────────────────────────
@@ -249,8 +243,6 @@ def main(args):
     warmup_steps = CFG["warmup_epochs"] * steps_per_ep
     print(f"Accum steps: {accum_steps} | Steps/epoch: {steps_per_ep} | Total: {total_steps}")
 
-    # ── State variables ───────────────────────────────────────────────
-    # Defined before signal handler so handler can access them via closure
     start_epoch   = 0
     best_val_loss = float("inf")
     global_step   = 0
@@ -261,19 +253,16 @@ def main(args):
     # ── Resume from checkpoint ───────────────────────────────────────
     if args.resume and os.path.exists(args.resume):
         print(f"Loading checkpoint: {args.resume}")
-        start_epoch, best_val_loss = load_checkpoint(
-            args.resume, model, optimizer, scaler, device
+        start_epoch, global_step, best_val_loss = load_checkpoint(
+            args.resume, model, optimizer, scaler, device, steps_per_ep
         )
-        global_step = start_epoch * steps_per_ep
 
     # ── Preemption Signal Handler ────────────────────────────────────
-    # Slurm sends SIGUSR1 90s before killing (requires --signal=SIGUSR1@90)
-    # Saves checkpoint so --requeue can resume cleanly
     def handle_preemption(signum, frame):
         print(f"\n⚠ SIGUSR1 received at epoch {epoch} — saving before preemption...")
         save_checkpoint(
             f"{CFG['out_dir']}/latest.pt",
-            epoch, model, optimizer, scaler, best_val_loss,
+            epoch, global_step, model, optimizer, scaler, best_val_loss
         )
         print("✓ Checkpoint saved. Job will requeue and resume automatically.")
         if not args.dry_run:
@@ -281,20 +270,30 @@ def main(args):
         exit(0)
 
     signal.signal(signal.SIGUSR1, handle_preemption)
-    # ─────────────────────────────────────────────────────────────────
 
     # ── Training Loop ────────────────────────────────────────────────
     for epoch in range(start_epoch, CFG["epochs"]):
         model.train()
         optimizer.zero_grad()
+        
+        # Calculate how many batches to skip if resuming mid-epoch
+        steps_done_this_epoch = global_step % steps_per_ep
+        batches_to_skip       = steps_done_this_epoch * accum_steps
+        
+        if batches_to_skip > 0:
+            print(f"  Skipping {batches_to_skip} batches (already processed this epoch)")
+
         epoch_loss = 0.0
         n_batches  = 0
 
         for step, batch in enumerate(train_loader):
+            # Skip batches already processed in this epoch
+            if step < batches_to_skip:
+                continue
+
             ctx = batch["context"].to(device, non_blocking=True)
             tgt = batch["target"].to(device,  non_blocking=True)
 
-            # Forward pass with mixed precision
             with torch.autocast(
                 device_type = "cuda" if torch.cuda.is_available() else "cpu",
                 dtype       = torch.bfloat16 if torch.cuda.is_available() else torch.float32,
@@ -302,10 +301,8 @@ def main(args):
                 loss, metrics = model(ctx, tgt)
                 loss = loss / accum_steps
 
-            # Backward
             scaler.scale(loss).backward()
 
-            # Optimizer step every accum_steps
             if (step + 1) % accum_steps == 0:
                 lr = get_lr(global_step, total_steps, warmup_steps, CFG["lr"])
                 for pg in optimizer.param_groups:
@@ -330,8 +327,14 @@ def main(args):
                         f"Cov {metrics['loss_covariance']:.4f}"
                     )
                     if not args.dry_run:
-                        wandb.log({**metrics, "lr": lr, "epoch": epoch + 1},
-                                  step=global_step)
+                        wandb.log({**metrics, "lr": lr, "epoch": epoch + 1}, step=global_step)
+
+                # ── Mid-epoch checkpoint ──────────────────────
+                if global_step % CFG["save_steps"] == 0:
+                    save_checkpoint(
+                        f"{CFG['out_dir']}/latest.pt",
+                        epoch, global_step, model, optimizer, scaler, best_val_loss
+                    )
 
         # ── Validation ───────────────────────────────────────────────
         model.eval()
@@ -373,44 +376,33 @@ def main(args):
             }, step=global_step)
 
         # ── Checkpointing ────────────────────────────────────────────
-        # IMPORTANT: update best_val_loss FIRST, then save latest.pt
-        # This fixes the bug where latest.pt was saved with best_val_loss=inf
-
-        # 1. Check and update best model first
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             save_checkpoint(
                 f"{CFG['out_dir']}/best.pt",
-                epoch + 1, model, optimizer, scaler, best_val_loss,
+                epoch + 1, global_step, model, optimizer, scaler, best_val_loss
             )
             print("  ✓ New best model!\n")
 
-        # 2. Save latest AFTER best_val_loss is updated
         save_checkpoint(
             f"{CFG['out_dir']}/latest.pt",
-            epoch + 1, model, optimizer, scaler, best_val_loss,
+            epoch + 1, global_step, model, optimizer, scaler, best_val_loss
         )
 
-        # 3. Periodic epoch snapshots
         if (epoch + 1) % CFG["save_every"] == 0:
             save_checkpoint(
                 f"{CFG['out_dir']}/epoch_{epoch+1}.pt",
-                epoch + 1, model, optimizer, scaler, best_val_loss,
+                epoch + 1, global_step, model, optimizer, scaler, best_val_loss
             )
 
         if args.dry_run:
             print("Dry run complete.")
             break
 
-    # ── Finish ───────────────────────────────────────────────────────
     if not args.dry_run:
         wandb.finish()
     print("Training complete!")
 
-
-# ─────────────────────────────────────────────
-# Entry Point
-# ─────────────────────────────────────────────
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train ViT-JEPA on active matter dataset")
