@@ -468,8 +468,8 @@ def train(args, cfg):
                 train_dataset,
                 batch_size  = cfg["batch_size"],
                 sampler     = epoch_sampler,
-                num_workers = num_workers,
-                pin_memory  = pin_memory,
+                num_workers = 2,
+                pin_memory  = True,
                 drop_last   = True,
             )
             in_loop_skip = 0   # the sampler did the skipping
