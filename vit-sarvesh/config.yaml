@@ -39,5 +39,5 @@ checkpointing:
 
 logging:
   log_every:     10
-  wandb_project: active-matter-jepa-sarvesh
+  wandb_project: active-matter-jepa-sarvesh-v2
   run_name:      vit-jepa-sarvesh-p16-d6-ema
