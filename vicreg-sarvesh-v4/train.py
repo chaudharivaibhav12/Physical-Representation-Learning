@@ -78,7 +78,7 @@ CONFIG = {
     "save_every_steps": 50,
 
     # Logging
-    "wandb_project":  "vicreg-active-matter-v4",
+    "wandb_project":  "vicreg-active-matter-v4-clean",
     "wandb_entity":   None,
     "run_name":       "sarvesh-v4",
     "log_every":      10,
