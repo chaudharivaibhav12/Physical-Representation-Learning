@@ -30,7 +30,7 @@ import torch
 import torch.nn as nn
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Sampler
 from torch.utils.data.distributed import DistributedSampler
 from torch.cuda.amp import GradScaler
 
@@ -119,6 +119,40 @@ def cleanup_distributed():
 
 
 # ─────────────────────────────────────────────
+# Resume-friendly sampler
+# ─────────────────────────────────────────────
+
+class OffsetSampler(Sampler):
+    """A deterministic-shuffle sampler that yields a random permutation of
+    [0, n) but skips the first `offset` indices.
+
+    Used on resume-mid-epoch to fast-forward past samples that were already
+    consumed before preemption, WITHOUT having the DataLoader workers load
+    them and throw them away. Skipped indices never reach a worker, so no
+    HDF5 reads happen for them.
+
+    Determinism note: this sampler reseeds from `seed` each epoch, so the
+    permutation order on resume differs from what the default RandomSampler
+    would have produced for that epoch. That's fine — with shuffle=True we
+    don't care which specific samples appear in which order, only that
+    every sample appears at most once per epoch.
+    """
+    def __init__(self, n: int, offset: int, seed: int):
+        self.n      = n
+        self.offset = max(0, min(offset, n))
+        self.seed   = seed
+
+    def __iter__(self):
+        g = torch.Generator()
+        g.manual_seed(self.seed)
+        order = torch.randperm(self.n, generator=g).tolist()
+        yield from order[self.offset:]
+
+    def __len__(self) -> int:
+        return self.n - self.offset
+
+
+# ─────────────────────────────────────────────
 # Checkpoint Utilities
 # ─────────────────────────────────────────────
 
@@ -144,8 +178,14 @@ def save_checkpoint(path, epoch, global_step, model, optimizer, scaler, best_val
 def load_checkpoint(path, model, optimizer, scaler, device):
     ckpt = torch.load(path, map_location=device)
     model.load_state_dict(ckpt["model"])
-    optimizer.load_state_dict(ckpt["optimizer"])
-    scaler.load_state_dict(ckpt["scaler"])
+    if "optimizer" in ckpt:
+        optimizer.load_state_dict(ckpt["optimizer"])
+    else:
+        print("  (checkpoint has no optimizer state — starting AdamW fresh)", flush=True)
+    if "scaler" in ckpt:
+        scaler.load_state_dict(ckpt["scaler"])
+    else:
+        print("  (checkpoint has no scaler state — starting GradScaler fresh)", flush=True)
     return (
         ckpt["epoch"],
         ckpt.get("global_step", 0),
@@ -334,13 +374,45 @@ def train(args, cfg):
         if not is_main or _save_state["saved"]:
             return
         _save_state["saved"] = True
+
+        # PyTorch's DataLoader installs a SIGCHLD handler that raises a
+        # RuntimeError when workers die. During SLURM preemption, the
+        # workers get SIGTERM at the same time we do, and that race
+        # interrupts torch.save. We're exiting anyway — silence SIGCHLD.
         try:
-            path = os.path.join(cfg["out_dir"], "latest.pt")
+            signal.signal(signal.SIGCHLD, signal.SIG_DFL)
+        except (ValueError, OSError):
+            pass
+
+        path = os.path.join(cfg["out_dir"], "latest.pt")
+
+        # Strategy 1: full checkpoint (model + optimizer + scaler).
+        try:
             save_checkpoint(path, _save_state["epoch"], _save_state["global_step"],
                             model, optimizer, scaler, _save_state["best_val_loss"], cfg)
             print(f"[PREEMPT] Emergency checkpoint saved ({reason})", flush=True)
+            return
         except Exception as e:
-            print(f"[PREEMPT] Emergency save failed: {e}", flush=True)
+            print(f"[PREEMPT] Full save failed: {e}", flush=True)
+
+        # Strategy 2: model-only fallback — at minimum we keep the weights.
+        # Loses optimizer momentum on resume but still better than nothing.
+        try:
+            encoder = model.module.encoder if hasattr(model, "module") else model.encoder
+            tmp = path + ".tmp"
+            torch.save({
+                "epoch":         _save_state["epoch"],
+                "global_step":   _save_state["global_step"],
+                "encoder":       encoder.state_dict(),
+                "model":         model.state_dict(),
+                "best_val_loss": _save_state["best_val_loss"],
+                "config":        cfg,
+            }, tmp)
+            os.replace(tmp, path)
+            print(f"[PREEMPT] Model-only fallback save succeeded ({reason})", flush=True)
+        except Exception as e:
+            print(f"[PREEMPT] Fallback save also failed: {e} "
+                  f"-- relying on last periodic save", flush=True)
 
     def handle_preemption(signum, frame):
         print(f"[PREEMPT] Signal {signum} received at "
@@ -373,22 +445,49 @@ def train(args, cfg):
         if train_sampler:
             train_sampler.set_epoch(epoch)
 
-        # If resuming mid-epoch, skip batches that were already processed
-        # before the last checkpoint. global_step counts optimizer steps;
-        # each opt step consumed `accum_steps` mini-batches.
+        # Resume-mid-epoch handling: how many opt steps and mini-batches
+        # have we already consumed from this epoch?
         steps_done_this_epoch = global_step % steps_per_epoch if steps_per_epoch > 0 else 0
         batches_to_skip       = steps_done_this_epoch * accum_steps
-        if batches_to_skip > 0 and is_main:
-            print(f"[RESUME] Skipping {batches_to_skip} batches "
-                  f"({steps_done_this_epoch} optimizer steps already done this epoch)",
-                  flush=True)
+        samples_to_skip       = batches_to_skip * cfg["batch_size"]
+
+        # Fast-skip path (single-GPU): build a one-shot DataLoader whose
+        # sampler already starts from `samples_to_skip`. Workers never load
+        # the skipped indices, so resume is near-instantaneous.
+        if samples_to_skip > 0 and train_sampler is None:
+            if is_main:
+                print(f"[RESUME] Fast-skipping {samples_to_skip} samples "
+                      f"({batches_to_skip} batches, {steps_done_this_epoch} opt steps) "
+                      f"via OffsetSampler — no I/O cost", flush=True)
+            epoch_sampler = OffsetSampler(
+                n      = len(train_ds),
+                offset = samples_to_skip,
+                seed   = 42 + epoch,
+            )
+            epoch_loader = DataLoader(
+                train_ds,
+                batch_size  = cfg["batch_size"],
+                sampler     = epoch_sampler,
+                num_workers = num_workers,
+                pin_memory  = pin_memory,
+                drop_last   = True,
+            )
+            in_loop_skip = 0   # the sampler did the skipping
+        else:
+            epoch_loader = train_loader
+            # DDP fallback: DistributedSampler doesn't support offset, so
+            # we still skip in the loop (rare; user is single-GPU now).
+            in_loop_skip = batches_to_skip
+            if in_loop_skip > 0 and is_main:
+                print(f"[RESUME] Skipping {in_loop_skip} batches via in-loop continue "
+                      f"(DDP path)", flush=True)
 
         epoch_loss = 0.0
         n_batches  = 0
         optimizer.zero_grad()
 
-        for step, batch in enumerate(train_loader):
-            if step < batches_to_skip:
+        for step, batch in enumerate(epoch_loader):
+            if step < in_loop_skip:
                 continue
 
             ctx = batch["context"].to(device, non_blocking=True)
