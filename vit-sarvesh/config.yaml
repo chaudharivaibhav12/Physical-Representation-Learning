@@ -35,7 +35,7 @@ training:
 checkpointing:
   out_dir:          /scratch/sb10583/checkpoints/vit-jepa-sarvesh
   save_every:       5
-  save_every_steps: 50
+  save_every_steps: 20
 
 logging:
   log_every:     10
