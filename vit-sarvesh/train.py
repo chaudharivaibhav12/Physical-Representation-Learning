@@ -78,7 +78,7 @@ def init_wandb(cfg, dry_run):
     if os.path.exists(id_file):
         run_id = open(id_file).read().strip()
         print(f"resuming wandb run: {run_id}")
-        wandb.init(project=project, name=name, id=run_id, resume="must", config=cfg)
+        wandb.init(project=project, name=name, id=run_id, resume="allow", config=cfg)
     else:
         run = wandb.init(project=project, name=name, config=cfg)
         open(id_file, "w").write(run.id)
