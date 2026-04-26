@@ -39,11 +39,10 @@ def get_lr(step, total_steps, warmup_steps, base_lr, min_lr=1e-6):
 # Checkpointing
 # ─────────────────────────────────────────────────────────────────────────────
 
-def save_checkpoint(path, epoch, global_step, model, optimizer, scaler, best_val_loss):
+def save_checkpoint(path, epoch, model, optimizer, scaler, best_val_loss):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     torch.save({
         "epoch":         epoch,
-        "global_step":   global_step,
         "model":         model.state_dict(),
         "optimizer":     optimizer.state_dict(),
         "scaler":        scaler.state_dict(),
@@ -58,33 +57,9 @@ def load_checkpoint(path, model, optimizer, scaler, device):
     optimizer.load_state_dict(ckpt["optimizer"])
     scaler.load_state_dict(ckpt["scaler"])
     start_epoch   = ckpt["epoch"]
-    global_step   = ckpt.get("global_step", 0)
     best_val_loss = ckpt.get("best_val_loss", float("inf"))
-    print(f"  resumed from epoch {start_epoch}, step {global_step}, best_val_loss={best_val_loss:.4f}")
-    return start_epoch, global_step, best_val_loss
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# WandB — persist run ID across preemptions
-# ─────────────────────────────────────────────────────────────────────────────
-
-def init_wandb(cfg, dry_run):
-    if dry_run:
-        return
-    out_dir      = cfg["checkpointing"]["out_dir"]
-    os.makedirs(out_dir, exist_ok=True)
-    id_file      = os.path.join(out_dir, "wandb_run_id.txt")
-    project      = cfg["logging"]["wandb_project"]
-    name         = cfg["logging"]["run_name"]
-
-    if os.path.exists(id_file):
-        run_id = open(id_file).read().strip()
-        print(f"resuming wandb run: {run_id}")
-        wandb.init(project=project, name=name, id=run_id, resume="allow", config=cfg)
-    else:
-        run = wandb.init(project=project, name=name, config=cfg)
-        open(id_file, "w").write(run.id)
-        print(f"started wandb run: {run.id}")
+    print(f"  resumed from epoch {start_epoch}, best_val_loss={best_val_loss:.4f}")
+    return start_epoch, best_val_loss
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -100,8 +75,6 @@ def main(args):
     use_cuda   = torch.cuda.is_available()
     num_workers = 4 if use_cuda else 0
     print(f"device: {device}")
-
-    init_wandb(cfg, args.dry_run)
 
     # ── Data ──────────────────────────────────────────────────────────────────
     d = cfg["data"]
@@ -146,9 +119,9 @@ def main(args):
     )
 
     # Token grid dimensions derived from model
-    num_t = m["num_frames"] // m["tubelet"]         # 8
-    num_h = d.get("crop_size", 224) // m["patch_size"]  # 14
-    num_w = num_h                                    # 14
+    num_t = m["num_frames"] // m["tubelet"]               # 8
+    num_h = d.get("crop_size", 224) // m["patch_size"]    # 14
+    num_w = num_h                                          # 14
 
     # ── Optimizer ─────────────────────────────────────────────────────────────
     optimizer = torch.optim.AdamW(
@@ -165,21 +138,31 @@ def main(args):
 
     start_epoch   = 0
     best_val_loss = float("inf")
-    global_step   = 0
     epoch         = 0
 
     os.makedirs(cfg["checkpointing"]["out_dir"], exist_ok=True)
 
     if args.resume and os.path.exists(args.resume):
         print(f"loading checkpoint: {args.resume}")
-        start_epoch, global_step, best_val_loss = load_checkpoint(args.resume, model, optimizer, scaler, device)
+        start_epoch, best_val_loss = load_checkpoint(args.resume, model, optimizer, scaler, device)
+
+    # global_step derived from epoch — same approach as vicreg-v2
+    global_step = start_epoch * steps_per_ep
+
+    # ── WandB ─────────────────────────────────────────────────────────────────
+    if not args.dry_run:
+        wandb.init(
+            project=cfg["logging"]["wandb_project"],
+            name=cfg["logging"]["run_name"],
+            config=cfg,
+        )
 
     # ── Preemption handler ────────────────────────────────────────────────────
     def handle_preemption(signum, frame):
         print(f"\nSIGUSR1 at epoch {epoch} — saving checkpoint before preemption...")
         save_checkpoint(
             f"{cfg['checkpointing']['out_dir']}/latest.pt",
-            epoch, global_step, model, optimizer, scaler, best_val_loss,
+            epoch, model, optimizer, scaler, best_val_loss,
         )
         if not args.dry_run:
             wandb.finish()
@@ -197,7 +180,6 @@ def main(args):
         for step, batch in enumerate(train_loader):
             frames = batch["frames"].to(device, non_blocking=True)
 
-            # Sample block mask — same for all samples in batch
             ctx_idx, tgt_idx = sample_block_mask(
                 num_t, num_h, num_w,
                 target_ratio=t["mask_ratio"],
@@ -242,10 +224,6 @@ def main(args):
                 global_step += 1
                 epoch_loss  += metrics["loss"]
                 n_batches   += 1
-
-                if global_step % cfg["checkpointing"]["save_every_steps"] == 0:
-                    save_checkpoint(f"{cfg['checkpointing']['out_dir']}/latest.pt",
-                                    epoch, global_step, model, optimizer, scaler, best_val_loss)
 
                 if global_step % cfg["logging"]["log_every"] == 0:
                     print(
@@ -299,13 +277,13 @@ def main(args):
         ckpt_dir = cfg["checkpointing"]["out_dir"]
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            save_checkpoint(f"{ckpt_dir}/best.pt", epoch + 1, global_step, model, optimizer, scaler, best_val_loss)
+            save_checkpoint(f"{ckpt_dir}/best.pt", epoch + 1, model, optimizer, scaler, best_val_loss)
             print("  new best model\n")
 
-        save_checkpoint(f"{ckpt_dir}/latest.pt", epoch + 1, global_step, model, optimizer, scaler, best_val_loss)
+        save_checkpoint(f"{ckpt_dir}/latest.pt", epoch + 1, model, optimizer, scaler, best_val_loss)
 
         if (epoch + 1) % cfg["checkpointing"]["save_every"] == 0:
-            save_checkpoint(f"{ckpt_dir}/epoch_{epoch+1}.pt", epoch + 1, global_step, model, optimizer, scaler, best_val_loss)
+            save_checkpoint(f"{ckpt_dir}/epoch_{epoch+1}.pt", epoch + 1, model, optimizer, scaler, best_val_loss)
 
         if args.dry_run:
             print("dry run complete.")
