@@ -17,7 +17,7 @@ import yaml
 import torch
 import torch.nn as nn
 import wandb
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 
 from dataset import ActiveMatterDataset
 from masking  import sample_block_mask
@@ -33,6 +33,26 @@ def get_lr(step, total_steps, warmup_steps, base_lr, min_lr=1e-6):
         return base_lr * step / max(warmup_steps, 1)
     progress = (step - warmup_steps) / max(total_steps - warmup_steps, 1)
     return min_lr + 0.5 * (base_lr - min_lr) * (1 + math.cos(math.pi * progress))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Per-epoch DataLoader — deterministic shuffle seeded by epoch
+# ─────────────────────────────────────────────────────────────────────────────
+
+def make_epoch_loader(dataset, epoch, batch_size, num_workers, pin_memory, skip_batches=0):
+    g = torch.Generator()
+    g.manual_seed(epoch)
+    indices = torch.randperm(len(dataset), generator=g).tolist()
+    # Trim to complete batches (same effect as drop_last=True)
+    n = (len(indices) // batch_size) * batch_size
+    indices = indices[:n]
+    # Skip already-processed batches — no data loading wasted
+    if skip_batches > 0:
+        indices = indices[skip_batches * batch_size:]
+        print(f"  fast-forwarding: skipping {skip_batches} batches, {len(indices) // batch_size} remaining")
+    subset = Subset(dataset, indices)
+    return DataLoader(subset, batch_size=batch_size, shuffle=False,
+                      num_workers=num_workers, pin_memory=pin_memory, drop_last=False)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -112,10 +132,6 @@ def main(args):
         stride=d["stride"], noise_std=0.0,
     )
     t = cfg["training"]
-    train_loader = DataLoader(
-        train_ds, batch_size=t["batch_size"], shuffle=True,
-        num_workers=num_workers, pin_memory=use_cuda, drop_last=True,
-    )
     val_loader = DataLoader(
         val_ds, batch_size=t["batch_size"], shuffle=False,
         num_workers=num_workers, pin_memory=use_cuda,
@@ -148,18 +164,20 @@ def main(args):
     num_h = d.get("crop_size", 224) // m["patch_size"]    # 14
     num_w = num_h                                          # 14
 
+    # ── Steps per epoch (from dataset size, not loader) ───────────────────────
+    samples_per_epoch = (len(train_ds) // t["batch_size"]) * t["batch_size"]
+    accum_steps  = max(1, t["target_batch"] // t["batch_size"])
+    steps_per_ep = (samples_per_epoch // t["batch_size"]) // accum_steps
+    total_steps  = t["epochs"] * steps_per_ep
+    warmup_steps = t["warmup_epochs"] * steps_per_ep
+    print(f"accum: {accum_steps}  steps/epoch: {steps_per_ep}  total: {total_steps}")
+
     # ── Optimizer ─────────────────────────────────────────────────────────────
     optimizer = torch.optim.AdamW(
         [p for p in model.parameters() if p.requires_grad],
         lr=t["lr"], betas=(0.9, 0.95), weight_decay=t["weight_decay"],
     )
     scaler = torch.amp.GradScaler("cuda", enabled=use_cuda)
-
-    accum_steps  = max(1, t["target_batch"] // t["batch_size"])
-    steps_per_ep = len(train_loader) // accum_steps
-    total_steps  = t["epochs"] * steps_per_ep
-    warmup_steps = t["warmup_epochs"] * steps_per_ep
-    print(f"accum: {accum_steps}  steps/epoch: {steps_per_ep}  total: {total_steps}")
 
     start_epoch   = 0
     best_val_loss = float("inf")
@@ -196,20 +214,16 @@ def main(args):
         epoch_loss = 0.0
         n_batches  = 0
 
-        # On the resumed epoch, skip batches already processed before the checkpoint.
-        # global_step % steps_per_ep = optimizer steps done so far this epoch.
-        # Multiply by accum_steps to get the number of batch iterations to skip.
-        batches_done_this_epoch = (global_step % steps_per_ep) * accum_steps
-        resume_epoch = (epoch == start_epoch and batches_done_this_epoch > 0)
-        if resume_epoch:
-            print(f"  skipping {batches_done_this_epoch} batches already processed in epoch {epoch+1}")
+        # Compute how many batches were already done in this epoch.
+        # batches_done is always a multiple of accum_steps since we only
+        # checkpoint at optimizer-step boundaries.
+        batches_done = (global_step % steps_per_ep) * accum_steps if epoch == start_epoch else 0
+        epoch_loader = make_epoch_loader(
+            train_ds, epoch, t["batch_size"], num_workers, use_cuda,
+            skip_batches=batches_done,
+        )
 
-        for step, batch in enumerate(train_loader):
-
-            # Fast-forward past already-processed batches on the resumed epoch
-            if resume_epoch and step < batches_done_this_epoch:
-                continue
-
+        for step, batch in enumerate(epoch_loader):
             frames = batch["frames"].to(device, non_blocking=True)
 
             ctx_idx, tgt_idx = sample_block_mask(
@@ -294,7 +308,8 @@ def main(args):
 
         # ── Collapse check ─────────────────────────────────────────────────────
         with torch.no_grad():
-            probe_frames = next(iter(val_loader))["frames"].to(device)
+            probe_batch = next(iter(val_loader))
+            probe_frames = probe_batch["frames"].to(device)
             emb_std = model.encode(probe_frames).std(dim=0).mean().item()
 
         avg_train = epoch_loss / max(n_batches, 1)

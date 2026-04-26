@@ -23,7 +23,7 @@ import torch
 import torch.nn as nn
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 from torch.utils.data.distributed import DistributedSampler
 from torch.cuda.amp import GradScaler
 
@@ -173,6 +173,23 @@ def init_wandb(cfg, is_main, dry_run):
 
 
 # ─────────────────────────────────────────────
+# Per-epoch DataLoader — deterministic shuffle seeded by epoch
+# ─────────────────────────────────────────────
+
+def make_epoch_loader(dataset, epoch, batch_size, num_workers, skip_batches=0):
+    g = torch.Generator()
+    g.manual_seed(epoch)
+    indices = torch.randperm(len(dataset), generator=g).tolist()
+    n = (len(indices) // batch_size) * batch_size
+    indices = indices[:n]
+    if skip_batches > 0:
+        indices = indices[skip_batches * batch_size:]
+    subset = Subset(dataset, indices)
+    return DataLoader(subset, batch_size=batch_size, shuffle=False,
+                      num_workers=4, pin_memory=True, drop_last=False)
+
+
+# ─────────────────────────────────────────────
 # Collapse Monitor
 # ─────────────────────────────────────────────
 
@@ -209,11 +226,6 @@ def train(args, cfg):
     )
 
     train_sampler = DistributedSampler(train_dataset) if distributed else None
-    train_loader  = DataLoader(
-        train_dataset, batch_size=cfg["batch_size"],
-        sampler=train_sampler, shuffle=(train_sampler is None),
-        num_workers=4, pin_memory=True, drop_last=True,
-    )
     val_loader = DataLoader(
         val_dataset, batch_size=cfg["batch_size"],
         shuffle=False, num_workers=2, pin_memory=True,
@@ -243,9 +255,10 @@ def train(args, cfg):
     scaler      = GradScaler(enabled=(cfg["amp_dtype"] == "fp16"))
     accum_steps = max(1, cfg["target_batch"] // (cfg["batch_size"] * world_size))
 
-    steps_per_epoch = len(train_loader) // accum_steps
-    total_steps     = cfg["epochs"] * steps_per_epoch
-    warmup_steps    = cfg["warmup_epochs"] * steps_per_epoch
+    samples_per_epoch = (len(train_dataset) // cfg["batch_size"]) * cfg["batch_size"]
+    steps_per_epoch   = (samples_per_epoch // cfg["batch_size"]) // accum_steps
+    total_steps       = cfg["epochs"] * steps_per_epoch
+    warmup_steps      = cfg["warmup_epochs"] * steps_per_epoch
 
     if is_main:
         print(f"Accum: {accum_steps} | Steps/epoch: {steps_per_epoch} | Total: {total_steps}")
@@ -281,23 +294,17 @@ def train(args, cfg):
     # ── Training ──────────────────────────────────────────────────────
     for epoch in range(start_epoch, cfg["epochs"]):
         model.train()
-        if train_sampler:
-            train_sampler.set_epoch(epoch)
 
         epoch_loss = 0.0
         n_batches  = 0
         optimizer.zero_grad()
 
-        batches_done_this_epoch = (global_step % steps_per_epoch) * accum_steps
-        resume_epoch = (epoch == start_epoch and batches_done_this_epoch > 0)
-        if is_main and resume_epoch:
-            print(f"  skipping {batches_done_this_epoch} batches already processed in epoch {epoch+1}")
+        batches_done = (global_step % steps_per_epoch) * accum_steps if epoch == start_epoch else 0
+        if is_main and batches_done > 0:
+            print(f"  fast-forwarding: skipping {batches_done} batches, resuming epoch {epoch+1} from step {global_step}")
+        epoch_loader = make_epoch_loader(train_dataset, epoch, cfg["batch_size"], 4, skip_batches=batches_done)
 
-        for step, batch in enumerate(train_loader):
-
-            if resume_epoch and step < batches_done_this_epoch:
-                continue
-
+        for step, batch in enumerate(epoch_loader):
             v1 = batch["view1"].to(device, non_blocking=True)
             v2 = batch["view2"].to(device, non_blocking=True)
 
