@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=vicreg-sarvesh-v4
+#SBATCH --job-name=vicreg_sarvesh_v4
 #SBATCH --account=csci_ga_2572-2026sp
 #SBATCH --partition=c12m85-a100-1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=80G
+#SBATCH --mem=32G
 #SBATCH --time=16:00:00
 #SBATCH --requeue
 #SBATCH --output=/scratch/sb10583/logs/vicreg_sarvesh_v4_%j.log
@@ -15,7 +15,7 @@
 #SBATCH --signal=SIGUSR1@90
 
 handle_preemption() {
-    echo "Preemption signal received at $(date). Requeueing job..."
+    echo "preemption signal at $(date) — requeueing job $SLURM_JOB_ID"
     scontrol requeue $SLURM_JOB_ID
     exit 0
 }
@@ -24,6 +24,13 @@ trap 'handle_preemption' SIGTERM SIGUSR1
 mkdir -p /scratch/sb10583/logs
 mkdir -p /scratch/sb10583/checkpoints/vicreg-v4
 
+CKPT=/scratch/sb10583/checkpoints/vicreg-v4/latest.pt
+RESUME_FLAG=""
+if [ -f "$CKPT" ]; then
+    RESUME_FLAG="--resume $CKPT"
+    echo "Resuming from $CKPT"
+fi
+
 singularity exec --bind /scratch --nv \
   --overlay /scratch/sb10583/overlay-10GB-400K.ext3:ro \
   /share/apps/images/cuda12.1.1-cudnn8.9.0-devel-ubuntu22.04.2.sif \
@@ -31,13 +38,5 @@ singularity exec --bind /scratch --nv \
     source /ext3/miniconda3/etc/profile.d/conda.sh
     conda activate base
     cd /scratch/sb10583/Physical-Representation-Learning/vicreg-sarvesh-v4
-
-    CKPT=/scratch/sb10583/checkpoints/vicreg-v4/latest.pt
-    RESUME_FLAG=''
-    if [ -f \"\$CKPT\" ]; then
-        RESUME_FLAG=\"--resume \$CKPT\"
-        echo \"Resuming from \$CKPT\"
-    fi
-
-    python -u train.py \$RESUME_FLAG
+    python -u train.py $RESUME_FLAG
   "
