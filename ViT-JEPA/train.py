@@ -202,16 +202,16 @@ def train(args, cfg):
         batch_size  = cfg["batch_size"],
         sampler     = train_sampler,
         shuffle     = (train_sampler is None),
-        num_workers = 0,
-        pin_memory  = False,
+        num_workers = 2,
+        pin_memory  = True,
         drop_last   = True,
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size  = cfg["batch_size"],
         shuffle     = False,
-        num_workers = 0,
-        pin_memory  = False,
+        num_workers = 2,
+        pin_memory  = True,
     )
 
     # ── Model ────────────────────────────────────────────────────────
@@ -361,10 +361,16 @@ def train(args, cfg):
                         f"Inv {metrics['loss_invariance']:.4f} | "
                         f"Var {metrics['loss_variance']:.4f} | "
                         f"Cov {metrics['loss_covariance']:.4f} | "
-                        f"GradNorm {grad_norm:.3f}"
+                        f"GradNorm {grad_norm:.3f}",
+                        flush=True,
                     )
                     if not args.dry_run:
                         wandb.log({**metrics, "lr": lr, "grad_norm": grad_norm, "epoch": epoch + 1}, step=global_step)
+
+                # Mid-epoch checkpoint every 10 gradient steps
+                if is_main and global_step % 10 == 0:
+                    latest_path = os.path.join(cfg["out_dir"], "latest.pt")
+                    save_checkpoint(latest_path, epoch, model, optimizer, scaler, best_val_loss, cfg)
 
         # ── Validation ───────────────────────────────────────────────
         model.eval()
