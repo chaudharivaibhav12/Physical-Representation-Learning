@@ -23,6 +23,7 @@ Usage:
 import os
 import math
 import time
+import signal
 import argparse
 import torch
 import torch.nn as nn
@@ -277,17 +278,44 @@ def train(args, cfg):
     if is_main and not args.dry_run:
         print("[WANDB] Initializing...", flush=True)
         try:
-            wandb.init(
-                project  = cfg["wandb_project"],
-                entity   = cfg.get("wandb_entity"),
-                name     = cfg["run_name"],
-                config   = cfg,
-                settings = wandb.Settings(init_timeout=60),
-            )
+            wandb_id_file = os.path.join(cfg["out_dir"], "wandb_run_id.txt")
+            if os.path.exists(wandb_id_file):
+                with open(wandb_id_file) as f:
+                    run_id = f.read().strip()
+                print(f"[WANDB] Resuming run: {run_id}", flush=True)
+                wandb.init(
+                    project  = cfg["wandb_project"],
+                    entity   = cfg.get("wandb_entity"),
+                    name     = cfg["run_name"],
+                    config   = cfg,
+                    id       = run_id,
+                    resume   = "must",
+                    settings = wandb.Settings(init_timeout=60),
+                )
+            else:
+                run = wandb.init(
+                    project  = cfg["wandb_project"],
+                    entity   = cfg.get("wandb_entity"),
+                    name     = cfg["run_name"],
+                    config   = cfg,
+                    settings = wandb.Settings(init_timeout=60),
+                )
+                with open(wandb_id_file, "w") as f:
+                    f.write(run.id)
             print("[WANDB] Initialized successfully.", flush=True)
         except Exception as e:
             print(f"[WANDB] Init failed ({e}), continuing without wandb.", flush=True)
             args.dry_run = True
+
+    # ── Preemption handler ───────────────────────────────────────────
+    def handle_preemption(signum, frame):
+        print("Preemption signal received, finishing wandb run...", flush=True)
+        if is_main and not args.dry_run and wandb.run is not None:
+            wandb.finish()
+        exit(0)
+
+    signal.signal(signal.SIGUSR1, handle_preemption)
+    signal.signal(signal.SIGTERM, handle_preemption)
 
     # ── Training ─────────────────────────────────────────────────────
     for epoch in range(start_epoch, cfg["epochs"]):
