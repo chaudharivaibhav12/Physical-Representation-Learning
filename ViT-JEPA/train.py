@@ -21,6 +21,7 @@ Usage:
 """
 
 import os
+import sys
 import math
 import time
 import signal
@@ -68,8 +69,8 @@ CONFIG = {
 
     # Training
     "epochs":            100,
-    "batch_size":        4,
-    "target_batch":      256,
+    "batch_size":        8,        # was 4; matches single-GPU throughput on one A100
+    "target_batch":      64,       # was 256; gives accum_steps=8 for fast optimizer ticks
     "lr":                1e-3,
     "weight_decay":      0.05,
     "grad_clip":         1.0,
@@ -122,7 +123,10 @@ def cleanup_distributed():
 # ─────────────────────────────────────────────
 
 def save_checkpoint(path, epoch, model, optimizer, scaler, best_val_loss, cfg):
+    """Atomic save: write to .tmp first, then rename. Avoids corrupt files
+    if the process is killed mid-write."""
     encoder = model.module.encoder if hasattr(model, "module") else model.encoder
+    tmp = path + ".tmp"
     torch.save({
         "epoch":          epoch,
         "encoder":        encoder.state_dict(),
@@ -131,8 +135,9 @@ def save_checkpoint(path, epoch, model, optimizer, scaler, best_val_loss, cfg):
         "scaler":         scaler.state_dict(),
         "best_val_loss":  best_val_loss,
         "config":         cfg,
-    }, path)
-    print(f"  Saved checkpoint: {path}")
+    }, tmp)
+    os.replace(tmp, path)   # atomic on POSIX
+    print(f"  Saved checkpoint: {path}", flush=True)
 
 
 def load_checkpoint(path, model, optimizer, scaler, device):
@@ -308,14 +313,51 @@ def train(args, cfg):
             args.dry_run = True
 
     # ── Preemption handler ───────────────────────────────────────────
+    # Mutable state the signal handler reads at signal time. We update
+    # `epoch` and `best_val_loss` on these as training progresses so that
+    # whatever the handler saves matches the latest training state.
+    _save_state = {
+        "epoch":         start_epoch,
+        "best_val_loss": best_val_loss,
+        "saved":         False,
+    }
+
+    def emergency_save(reason: str = ""):
+        if not is_main or _save_state["saved"]:
+            return
+        _save_state["saved"] = True
+        try:
+            path = os.path.join(cfg["out_dir"], "latest.pt")
+            save_checkpoint(path, _save_state["epoch"], model, optimizer,
+                            scaler, _save_state["best_val_loss"], cfg)
+            print(f"[PREEMPT] Emergency checkpoint saved ({reason})", flush=True)
+        except Exception as e:
+            print(f"[PREEMPT] Emergency save failed: {e}", flush=True)
+
     def handle_preemption(signum, frame):
-        print("Preemption signal received, finishing wandb run...", flush=True)
+        print(f"[PREEMPT] Signal {signum} received at "
+              f"{time.strftime('%H:%M:%S')}", flush=True)
+        emergency_save(reason=f"signal {signum}")
         if is_main and not args.dry_run and wandb.run is not None:
-            wandb.finish()
-        exit(0)
+            try:
+                wandb.finish()
+            except Exception:
+                pass
+        sys.exit(0)
 
     signal.signal(signal.SIGUSR1, handle_preemption)
     signal.signal(signal.SIGTERM, handle_preemption)
+
+    # Initial checkpoint so even instant preemption is recoverable.
+    if is_main and not (args.resume and os.path.exists(args.resume)):
+        init_path = os.path.join(cfg["out_dir"], "latest.pt")
+        save_checkpoint(init_path, start_epoch, model, optimizer, scaler,
+                        best_val_loss, cfg)
+        print(f"[INIT] Initial checkpoint written to {init_path}", flush=True)
+
+    # Wall-clock checkpoint cadence (5 minutes).
+    SAVE_INTERVAL_SECS = 5 * 60
+    last_save_time = time.time()
 
     # ── Training ─────────────────────────────────────────────────────
     for epoch in range(start_epoch, cfg["epochs"]):
@@ -367,10 +409,16 @@ def train(args, cfg):
                     if not args.dry_run:
                         wandb.log({**metrics, "lr": lr, "grad_norm": grad_norm, "epoch": epoch + 1}, step=global_step)
 
-                # Mid-epoch checkpoint every 10 gradient steps
-                if is_main and global_step % 10 == 0:
+            # ── Wall-clock checkpoint (runs every mini-batch, not every
+            # gradient step, so slow accumulation can't block it) ──
+            if is_main:
+                _save_state["epoch"]         = epoch
+                _save_state["best_val_loss"] = best_val_loss
+                if time.time() - last_save_time > SAVE_INTERVAL_SECS:
                     latest_path = os.path.join(cfg["out_dir"], "latest.pt")
-                    save_checkpoint(latest_path, epoch, model, optimizer, scaler, best_val_loss, cfg)
+                    save_checkpoint(latest_path, epoch, model, optimizer,
+                                    scaler, best_val_loss, cfg)
+                    last_save_time = time.time()
 
         # ── Validation ───────────────────────────────────────────────
         model.eval()
