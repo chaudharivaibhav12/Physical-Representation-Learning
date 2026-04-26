@@ -59,13 +59,13 @@ CONFIG = {
 
     # VICReg loss — unchanged from v2
     "sim_weight":     25.0,
-    "var_weight":     50.0,
+    "var_weight":     25.0,
     "cov_weight":     1.0,
 
     # Training — unchanged from v2
     "epochs":         100,
-    "batch_size":     4,
-    "target_batch":   32,
+    "batch_size":     8,
+    "target_batch":   64,
     "lr":             1e-3,
     "weight_decay":   0.05,
     "grad_clip":      1.0,
