@@ -288,7 +288,16 @@ def train(args, cfg):
         n_batches  = 0
         optimizer.zero_grad()
 
+        batches_done_this_epoch = (global_step % steps_per_epoch) * accum_steps
+        resume_epoch = (epoch == start_epoch and batches_done_this_epoch > 0)
+        if is_main and resume_epoch:
+            print(f"  skipping {batches_done_this_epoch} batches already processed in epoch {epoch+1}")
+
         for step, batch in enumerate(train_loader):
+
+            if resume_epoch and step < batches_done_this_epoch:
+                continue
+
             v1 = batch["view1"].to(device, non_blocking=True)
             v2 = batch["view2"].to(device, non_blocking=True)
 
