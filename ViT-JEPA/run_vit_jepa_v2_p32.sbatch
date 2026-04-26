@@ -11,6 +11,7 @@
 #SBATCH --requeue
 #SBATCH --output=/scratch/vc2836/DL/logs/vit_jepa_v2_p32_%j.out
 #SBATCH --error=/scratch/vc2836/DL/logs/vit_jepa_v2_p32_%j.err
+#SBATCH --open-mode=append
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=vc2836@nyu.edu
 #SBATCH --signal=SIGUSR1@90

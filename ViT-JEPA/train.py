@@ -122,13 +122,14 @@ def cleanup_distributed():
 # Checkpoint Utilities
 # ─────────────────────────────────────────────
 
-def save_checkpoint(path, epoch, model, optimizer, scaler, best_val_loss, cfg):
+def save_checkpoint(path, epoch, global_step, model, optimizer, scaler, best_val_loss, cfg):
     """Atomic save: write to .tmp first, then rename. Avoids corrupt files
     if the process is killed mid-write."""
     encoder = model.module.encoder if hasattr(model, "module") else model.encoder
     tmp = path + ".tmp"
     torch.save({
         "epoch":          epoch,
+        "global_step":    global_step,
         "encoder":        encoder.state_dict(),
         "model":          model.state_dict(),
         "optimizer":      optimizer.state_dict(),
@@ -137,7 +138,7 @@ def save_checkpoint(path, epoch, model, optimizer, scaler, best_val_loss, cfg):
         "config":         cfg,
     }, tmp)
     os.replace(tmp, path)   # atomic on POSIX
-    print(f"  Saved checkpoint: {path}", flush=True)
+    print(f"  Saved checkpoint: {path} (epoch={epoch}, step={global_step})", flush=True)
 
 
 def load_checkpoint(path, model, optimizer, scaler, device):
@@ -145,7 +146,11 @@ def load_checkpoint(path, model, optimizer, scaler, device):
     model.load_state_dict(ckpt["model"])
     optimizer.load_state_dict(ckpt["optimizer"])
     scaler.load_state_dict(ckpt["scaler"])
-    return ckpt["epoch"], ckpt.get("best_val_loss", float("inf"))
+    return (
+        ckpt["epoch"],
+        ckpt.get("global_step", 0),
+        ckpt.get("best_val_loss", float("inf")),
+    )
 
 
 # ─────────────────────────────────────────────
@@ -273,10 +278,12 @@ def train(args, cfg):
     if args.resume and os.path.exists(args.resume):
         if is_main:
             print(f"[RESUME] Loading checkpoint: {args.resume}")
-        start_epoch, best_val_loss = load_checkpoint(args.resume, model, optimizer, scaler, device)
-        global_step = start_epoch * steps_per_epoch
+        start_epoch, global_step, best_val_loss = load_checkpoint(
+            args.resume, model, optimizer, scaler, device
+        )
         if is_main:
-            print(f"[RESUME] Resuming from epoch {start_epoch}\n")
+            print(f"[RESUME] Resuming from epoch {start_epoch}, "
+                  f"global_step {global_step}, best_val_loss {best_val_loss:.4f}\n")
 
     # ── WandB ────────────────────────────────────────────────────────
     os.makedirs(cfg["out_dir"], exist_ok=True)
@@ -314,10 +321,11 @@ def train(args, cfg):
 
     # ── Preemption handler ───────────────────────────────────────────
     # Mutable state the signal handler reads at signal time. We update
-    # `epoch` and `best_val_loss` on these as training progresses so that
+    # epoch / global_step / best_val_loss as training progresses so that
     # whatever the handler saves matches the latest training state.
     _save_state = {
         "epoch":         start_epoch,
+        "global_step":   global_step,
         "best_val_loss": best_val_loss,
         "saved":         False,
     }
@@ -328,8 +336,8 @@ def train(args, cfg):
         _save_state["saved"] = True
         try:
             path = os.path.join(cfg["out_dir"], "latest.pt")
-            save_checkpoint(path, _save_state["epoch"], model, optimizer,
-                            scaler, _save_state["best_val_loss"], cfg)
+            save_checkpoint(path, _save_state["epoch"], _save_state["global_step"],
+                            model, optimizer, scaler, _save_state["best_val_loss"], cfg)
             print(f"[PREEMPT] Emergency checkpoint saved ({reason})", flush=True)
         except Exception as e:
             print(f"[PREEMPT] Emergency save failed: {e}", flush=True)
@@ -351,8 +359,8 @@ def train(args, cfg):
     # Initial checkpoint so even instant preemption is recoverable.
     if is_main and not (args.resume and os.path.exists(args.resume)):
         init_path = os.path.join(cfg["out_dir"], "latest.pt")
-        save_checkpoint(init_path, start_epoch, model, optimizer, scaler,
-                        best_val_loss, cfg)
+        save_checkpoint(init_path, start_epoch, global_step, model, optimizer,
+                        scaler, best_val_loss, cfg)
         print(f"[INIT] Initial checkpoint written to {init_path}", flush=True)
 
     # Wall-clock checkpoint cadence (5 minutes).
@@ -365,11 +373,24 @@ def train(args, cfg):
         if train_sampler:
             train_sampler.set_epoch(epoch)
 
+        # If resuming mid-epoch, skip batches that were already processed
+        # before the last checkpoint. global_step counts optimizer steps;
+        # each opt step consumed `accum_steps` mini-batches.
+        steps_done_this_epoch = global_step % steps_per_epoch if steps_per_epoch > 0 else 0
+        batches_to_skip       = steps_done_this_epoch * accum_steps
+        if batches_to_skip > 0 and is_main:
+            print(f"[RESUME] Skipping {batches_to_skip} batches "
+                  f"({steps_done_this_epoch} optimizer steps already done this epoch)",
+                  flush=True)
+
         epoch_loss = 0.0
         n_batches  = 0
         optimizer.zero_grad()
 
         for step, batch in enumerate(train_loader):
+            if step < batches_to_skip:
+                continue
+
             ctx = batch["context"].to(device, non_blocking=True)
             tgt = batch["target"].to(device,  non_blocking=True)
 
@@ -413,10 +434,11 @@ def train(args, cfg):
             # gradient step, so slow accumulation can't block it) ──
             if is_main:
                 _save_state["epoch"]         = epoch
+                _save_state["global_step"]   = global_step
                 _save_state["best_val_loss"] = best_val_loss
                 if time.time() - last_save_time > SAVE_INTERVAL_SECS:
                     latest_path = os.path.join(cfg["out_dir"], "latest.pt")
-                    save_checkpoint(latest_path, epoch, model, optimizer,
+                    save_checkpoint(latest_path, epoch, global_step, model, optimizer,
                                     scaler, best_val_loss, cfg)
                     last_save_time = time.time()
 
@@ -456,17 +478,17 @@ def train(args, cfg):
                 }, step=global_step)
 
             latest_path = os.path.join(cfg["out_dir"], "latest.pt")
-            save_checkpoint(latest_path, epoch + 1, model, optimizer, scaler, best_val_loss, cfg)
+            save_checkpoint(latest_path, epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg)
 
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 best_path = os.path.join(cfg["out_dir"], "best.pt")
-                save_checkpoint(best_path, epoch + 1, model, optimizer, scaler, best_val_loss, cfg)
+                save_checkpoint(best_path, epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg)
                 print(f"  ✓ New best model saved!\n")
 
             if (epoch + 1) % cfg["save_every"] == 0:
                 ep_path = os.path.join(cfg["out_dir"], f"epoch_{epoch+1}.pt")
-                save_checkpoint(ep_path, epoch + 1, model, optimizer, scaler, best_val_loss, cfg)
+                save_checkpoint(ep_path, epoch + 1, global_step, model, optimizer, scaler, best_val_loss, cfg)
 
         if args.dry_run:
             print("[DRY RUN] Stopping after 1 epoch.")
