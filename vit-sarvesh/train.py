@@ -242,6 +242,10 @@ def main(args):
                 epoch_loss  += metrics["loss"]
                 n_batches   += 1
 
+                if global_step % cfg["checkpointing"]["save_every_steps"] == 0:
+                    save_checkpoint(f"{cfg['checkpointing']['out_dir']}/latest.pt",
+                                    epoch, model, optimizer, scaler, best_val_loss)
+
                 if global_step % cfg["logging"]["log_every"] == 0:
                     print(
                         f"ep {epoch+1:3d} | step {global_step:5d} | lr {lr:.2e} | "

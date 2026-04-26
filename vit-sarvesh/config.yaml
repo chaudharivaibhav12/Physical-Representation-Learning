@@ -33,8 +33,9 @@ training:
   num_mask_blocks: 4       # number of contiguous spatiotemporal target blocks
 
 checkpointing:
-  out_dir:    /scratch/sb10583/checkpoints/vit-jepa-sarvesh
-  save_every: 5
+  out_dir:         /scratch/sb10583/checkpoints/vit-jepa-sarvesh
+  save_every:      5    # epoch-level snapshots
+  save_every_steps: 20  # step-level latest.pt saves
 
 logging:
   log_every:     10
