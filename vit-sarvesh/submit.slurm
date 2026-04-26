@@ -15,7 +15,9 @@
 #SBATCH --signal=SIGUSR1@90
 
 handle_preemption() {
-    echo "preemption signal at $(date) — requeueing job $SLURM_JOB_ID"
+    echo "preemption signal at $(date) — forwarding to Python, then requeueing $SLURM_JOB_ID"
+    kill -SIGUSR1 $CHILD_PID 2>/dev/null
+    wait $CHILD_PID 2>/dev/null
     scontrol requeue $SLURM_JOB_ID
     exit 0
 }
@@ -38,4 +40,6 @@ singularity exec --bind /scratch --nv \
     conda activate base
     cd /scratch/sb10583/Physical-Representation-Learning/vit-sarvesh
     python -u train.py $RESUME_FLAG
-  "
+  " &
+CHILD_PID=$!
+wait $CHILD_PID

@@ -75,7 +75,7 @@ CONFIG = {
     # Checkpointing
     "out_dir":          "/scratch/sb10583/checkpoints/vicreg-v4",
     "save_every":       5,
-    "save_every_steps": 50,
+    "save_every_steps": 20,
 
     # Logging
     "wandb_project":  "vicreg-active-matter-v4-clean",
