@@ -327,7 +327,7 @@ class MAEDecoder(nn.Module):
         x_vis = self.encoder_to_decoder(x_vis)   # (B, N_vis, D)
 
         # Build full sequence: mask tokens everywhere, then place visible tokens
-        x_full = self.mask_token.expand(B, N, -1).clone()      # (B, N, D)
+        x_full = self.mask_token.expand(B, N, -1).clone().to(x_vis.dtype)  # (B, N, D)
         idx    = ids_keep.unsqueeze(-1).expand(-1, -1, D)       # (B, N_vis, D)
         x_full.scatter_(1, idx, x_vis)                          # place visible tokens
 
