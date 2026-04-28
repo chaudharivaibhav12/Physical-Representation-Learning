@@ -9,6 +9,7 @@
 #SBATCH --mem=32G
 #SBATCH --time=1:00:00
 #SBATCH --output=/scratch/sb10583/logs/vit_jepa_eval_%j.log
+#SBATCH --requeue
 
 CKPT_DIR=/scratch/sb10583/checkpoints/vit-jepa-sarvesh
 OUT_DIR=/scratch/sb10583/eval-results/vit-jepa-sarvesh

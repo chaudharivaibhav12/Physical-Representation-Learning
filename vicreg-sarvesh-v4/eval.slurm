@@ -9,6 +9,7 @@
 #SBATCH --mem=32G
 #SBATCH --time=1:00:00
 #SBATCH --output=/scratch/sb10583/logs/vicreg_v4_eval_%j.log
+#SBATCH --requeue
 
 CKPT_DIR=/scratch/sb10583/checkpoints/vicreg-v4
 OUT_DIR=/scratch/sb10583/eval-results/vicreg-v4
