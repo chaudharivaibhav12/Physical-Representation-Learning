@@ -1,7 +1,7 @@
-# conv-JEPA baseline for active_matter — reads raw HDF5 directly.
-# No .npy cache files.  Only pre-processing is bilinear 256→224 resize.
+# Conv-JEPA with EMA target encoder — no augmentation.
+# Replaces VICReg with EMA + pure MSE loss (I-JEPA/BYOL style).
 
-run_name: "activematter-convjepa-direct"
+run_name: "activematter-convjepa-ema"
 out_path: "./checkpoints"
 seed: 42
 wandb_project: "physics-jepa-baseline"
@@ -39,7 +39,7 @@ model:
 # Training
 # ---------------------------------------------------------------------------
 train:
-  num_epochs: 15
+  num_epochs: 30
   batch_size: 8
   target_global_batch_size: 256
   num_workers: 4
@@ -55,11 +55,12 @@ train:
   lr_scheduler: "cosine"
   lr_scheduler_warmup_epochs: 1
 
-  # VICReg
-  sim_coeff: 2.0
-  std_coeff: 20.0
-  cov_coeff: 2.0
-  vicreg_chunks: 5
+  # EMA target encoder — cosine schedule τ_start → τ_end over total training steps.
+  # τ_start=0.996: target updates 0.4% toward online encoder per step (faster early signal).
+  # τ_end=0.9999:  nearly frozen target by end of training (stable representations).
+  # These are the primary ablation parameters for the hyperparameter search.
+  ema_momentum_start: 0.996
+  ema_momentum_end: 0.9999
 
   # Mixed precision
   use_amp: true
