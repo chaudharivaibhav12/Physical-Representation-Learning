@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=vicreg_v4_eval
 #SBATCH --account=csci_ga_2572-2026sp
-#SBATCH --partition=c12m85-a100-1
+#SBATCH --partition=n1s8-t4-1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-node=1
