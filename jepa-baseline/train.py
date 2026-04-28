@@ -402,6 +402,9 @@ class JEPATrainer:
                         self.cfg.train.grad_clip,
                     )
 
+                # Capture grad norm before zero_grad wipes the gradients.
+                grad_norm = compute_gradient_norm(self.optimizer)
+
                 if self.scaler is not None:
                     self.scaler.step(self.optimizer)
                     self.scaler.update()
@@ -419,14 +422,16 @@ class JEPATrainer:
 
                 if self.global_step % self.log_every == 0:
                     avg_batch_ms = sum(batch_times) / len(batch_times) * 1000 if batch_times else 0
-                    self._log_train(running, epoch, t0, batch_time_ms=avg_batch_ms)
+                    self._log_train(running, epoch, t0, grad_norm=grad_norm,
+                                    batch_time_ms=avg_batch_ms)
                     running.clear()
                     batch_times = []
                     t0 = time.time()
 
         if running:
             avg_batch_ms = sum(batch_times) / len(batch_times) * 1000 if batch_times else 0
-            self._log_train(running, epoch, t0, batch_time_ms=avg_batch_ms)
+            self._log_train(running, epoch, t0, grad_norm=grad_norm,
+                            batch_time_ms=avg_batch_ms)
 
     @torch.no_grad()
     def _validate(self, epoch: int) -> Dict[str, float]:
@@ -462,7 +467,7 @@ class JEPATrainer:
         return reduced
 
     def _log_train(self, running: Dict[str, list], epoch: int, t0: float,
-                   batch_time_ms: float = 0.0):
+                   grad_norm: float = 0.0, batch_time_ms: float = 0.0):
         metrics = {}
         for k, vals in running.items():
             vals_stacked = torch.stack(vals)
@@ -474,12 +479,10 @@ class JEPATrainer:
 
         metrics["train/lr"] = self.scheduler.get_last_lr()
         metrics["train/ema_momentum"] = self._get_ema_momentum()
+        metrics["train/grad_norm"] = grad_norm
         metrics["epoch"] = epoch
         steps_per_sec = self.log_every / max(1e-6, time.time() - t0)
         metrics["train/steps_per_sec"] = steps_per_sec
-
-        grad_norm = compute_gradient_norm(self.optimizer)
-        metrics["train/grad_norm"] = grad_norm
 
         if batch_time_ms > 0:
             metrics["train/batch_time_ms"] = batch_time_ms
