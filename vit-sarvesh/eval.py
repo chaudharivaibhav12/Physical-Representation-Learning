@@ -65,7 +65,9 @@ def evaluate(cfg, checkpoint_path, split, batch_size=32):
     ckpt = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(ckpt["model"])
     model.eval()
-    print(f"loaded checkpoint: {checkpoint_path}")
+    for param in model.parameters():
+        param.requires_grad = False
+    print(f"loaded checkpoint: {checkpoint_path}  [encoder frozen]")
 
     # ── Extract embeddings ────────────────────────────────────────────────────
     d = cfg["data"]
