@@ -190,9 +190,10 @@ def evaluate(args, cfg):
     print("[LOAD] Encoder frozen.\n")
 
     # ── Datasets ──────────────────────────────────────────────────────
-    train_ds = ActiveMatterEval(cfg["data_dir"], split="train",  crop_size=cfg["crop_size"])
-    val_ds   = ActiveMatterEval(cfg["data_dir"], split="valid",  crop_size=cfg["crop_size"])
-    test_ds  = ActiveMatterEval(cfg["data_dir"], split="test",   crop_size=cfg["crop_size"])
+    # stride=1 gives 8750/1200/1300 samples matching the project spec
+    train_ds = ActiveMatterEval(cfg["data_dir"], split="train",  crop_size=cfg["crop_size"], stride=1)
+    val_ds   = ActiveMatterEval(cfg["data_dir"], split="valid",  crop_size=cfg["crop_size"], stride=1)
+    test_ds  = ActiveMatterEval(cfg["data_dir"], split="test",   crop_size=cfg["crop_size"], stride=1)
 
     train_loader = DataLoader(train_ds, batch_size=cfg["batch_size"], shuffle=False, num_workers=4)
     val_loader   = DataLoader(val_ds,   batch_size=cfg["batch_size"], shuffle=False, num_workers=2)
