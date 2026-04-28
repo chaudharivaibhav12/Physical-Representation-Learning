@@ -28,12 +28,13 @@ class ActiveMatterDataset(Dataset):
         crop_size:  int   = 224,
         stride:     int   = 1,
         noise_std:  float = 1.0,
+        augment:    bool  = None,   # None = auto (train→True, val/test→False)
     ):
         self.data_dir   = os.path.join(data_dir, split)
         self.num_frames = num_frames
         self.crop_size  = crop_size
         self.noise_std  = noise_std if split == "train" else 0.0
-        self.is_train   = split == "train"
+        self.is_train   = (split == "train") if augment is None else augment
 
         self.files = sorted(glob.glob(os.path.join(self.data_dir, "*.hdf5")))
         assert len(self.files) > 0, f"No HDF5 files found in {self.data_dir}"

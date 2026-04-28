@@ -71,7 +71,7 @@ def evaluate(cfg, checkpoint_path, split, batch_size=32):
     d = cfg["data"]
 
     def make_loader(sp):
-        ds = ActiveMatterDataset(d["data_dir"], split=sp, stride=d["stride"], noise_std=0.0)
+        ds = ActiveMatterDataset(d["data_dir"], split=sp, stride=d["stride"], noise_std=0.0, augment=False)
         return DataLoader(ds, batch_size=batch_size, shuffle=False,
                           num_workers=num_workers, pin_memory=use_cuda)
 
