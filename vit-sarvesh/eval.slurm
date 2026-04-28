@@ -23,12 +23,6 @@ singularity exec --bind /scratch --nv \
     conda activate base
     cd /scratch/sb10583/Physical-Representation-Learning/vit-sarvesh
 
-    echo '=== best.pt (valid) ===' | tee $OUT_DIR/best_eval.txt
-    python eval.py --checkpoint $CKPT_DIR/best.pt --split valid 2>&1 | tee -a $OUT_DIR/best_eval.txt
-
-    echo '=== best.pt (test) ===' | tee $OUT_DIR/best_eval_test.txt
-    python eval.py --checkpoint $CKPT_DIR/best.pt --split test 2>&1 | tee -a $OUT_DIR/best_eval_test.txt
-
     echo '=== latest.pt (valid) ===' | tee $OUT_DIR/latest_eval.txt
     python eval.py --checkpoint $CKPT_DIR/latest.pt --split valid 2>&1 | tee -a $OUT_DIR/latest_eval.txt
 
