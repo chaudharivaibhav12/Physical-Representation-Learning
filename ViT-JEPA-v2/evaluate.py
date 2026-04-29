@@ -9,10 +9,11 @@ alpha and zeta using:
 Both evaluated with MSE loss on z-score normalized targets.
 
 Usage:
-  python evaluate.py --checkpoint /scratch/ok2287/checkpoints/vit_jepa/best.pt
+  python evaluate.py --checkpoint /scratch/vc2836/DL/checkpoints/vit_jepa_v2/best.pt
 """
 
 import os
+import json
 import argparse
 import numpy as np
 import torch
@@ -27,7 +28,7 @@ from dataset import ActiveMatterDataset
 
 
 CONFIG = {
-    "data_dir":    "/scratch/ok2287/data/active_matter/data",
+    "data_dir":    "/scratch/vc2836/DL/data/active_matter/data",
     "num_frames":  16,
     "crop_size":   224,
     "stride":      4,
@@ -100,6 +101,8 @@ def train_linear_probe(
     epochs: int = 50,
     lr: float = 1e-3,
     label: str = "alpha",
+    test_emb: np.ndarray = None,
+    test_targets: np.ndarray = None,
 ) -> dict:
     """
     Train a single linear layer on frozen embeddings.
@@ -145,9 +148,18 @@ def train_linear_probe(
     with torch.no_grad():
         train_mse = nn.functional.mse_loss(probe(X_train), y_train_norm).item()
         val_mse   = nn.functional.mse_loss(probe(X_val),   y_val_norm).item()
+        test_mse  = None
+        if test_emb is not None and test_targets is not None:
+            X_test   = torch.tensor(test_emb,     dtype=torch.float32, device=device)
+            y_test   = torch.tensor(test_targets, dtype=torch.float32, device=device)
+            y_test_norm = (y_test - mean) / std
+            test_mse = nn.functional.mse_loss(probe(X_test), y_test_norm).item()
 
-    print(f"  Linear Probe [{label}] → Train MSE: {train_mse:.4f} | Val MSE: {val_mse:.4f}")
-    return {"train_mse": train_mse, "val_mse": val_mse}
+    msg = f"  Linear Probe [{label}] → Train MSE: {train_mse:.4f} | Val MSE: {val_mse:.4f}"
+    if test_mse is not None:
+        msg += f" | Test MSE: {test_mse:.4f}"
+    print(msg)
+    return {"train_mse": train_mse, "val_mse": val_mse, "test_mse": test_mse}
 
 
 # ─────────────────────────────────────────────
@@ -161,6 +173,8 @@ def evaluate_knn(
     val_targets: np.ndarray,
     k: int = 20,
     label: str = "alpha",
+    test_emb: np.ndarray = None,
+    test_targets: np.ndarray = None,
 ) -> dict:
     """
     kNN regression on frozen embeddings.
@@ -182,9 +196,17 @@ def evaluate_knn(
 
     train_mse = mean_squared_error(y_train_norm, knn.predict(X_train))
     val_mse   = mean_squared_error(y_val_norm,   knn.predict(X_val))
+    test_mse  = None
+    if test_emb is not None and test_targets is not None:
+        y_test_norm = (test_targets - mean) / std
+        X_test = scaler.transform(test_emb)
+        test_mse = mean_squared_error(y_test_norm, knn.predict(X_test))
 
-    print(f"  kNN (k={k}) [{label}]    → Train MSE: {train_mse:.4f} | Val MSE: {val_mse:.4f}")
-    return {"train_mse": train_mse, "val_mse": val_mse}
+    msg = f"  kNN (k={k}) [{label}]    → Train MSE: {train_mse:.4f} | Val MSE: {val_mse:.4f}"
+    if test_mse is not None:
+        msg += f" | Test MSE: {test_mse:.4f}"
+    print(msg)
+    return {"train_mse": train_mse, "val_mse": val_mse, "test_mse": test_mse}
 
 
 # ─────────────────────────────────────────────
@@ -251,6 +273,7 @@ def evaluate(args, cfg):
         cfg["embed_dim"],
         epochs=cfg["probe_epochs"],
         label="alpha",
+        test_emb=test_emb, test_targets=test_alpha,
     )
     lp_zeta = train_linear_probe(
         train_emb, train_zeta,
@@ -258,6 +281,7 @@ def evaluate(args, cfg):
         cfg["embed_dim"],
         epochs=cfg["probe_epochs"],
         label="zeta",
+        test_emb=test_emb, test_targets=test_zeta,
     )
 
     # ── kNN Regression ───────────────────────────────────────────────
@@ -265,22 +289,46 @@ def evaluate(args, cfg):
     print("kNN REGRESSION RESULTS")
     print("=" * 50)
 
-    knn_alpha = evaluate_knn(train_emb, train_alpha, val_emb, val_alpha, k=cfg["k"], label="alpha")
-    knn_zeta  = evaluate_knn(train_emb, train_zeta,  val_emb, val_zeta,  k=cfg["k"], label="zeta")
+    knn_alpha = evaluate_knn(train_emb, train_alpha, val_emb, val_alpha, k=cfg["k"], label="alpha",
+                             test_emb=test_emb, test_targets=test_alpha)
+    knn_zeta  = evaluate_knn(train_emb, train_zeta,  val_emb, val_zeta,  k=cfg["k"], label="zeta",
+                             test_emb=test_emb, test_targets=test_zeta)
 
     # ── Final Summary ────────────────────────────────────────────────
     print("\n" + "=" * 50)
-    print("FINAL SUMMARY (Validation MSE, z-score normalized)")
+    print("FINAL SUMMARY (z-score normalized MSE)")
     print("=" * 50)
-    print(f"  Linear Probe — alpha: {lp_alpha['val_mse']:.4f}")
-    print(f"  Linear Probe — zeta:  {lp_zeta['val_mse']:.4f}")
-    print(f"  kNN          — alpha: {knn_alpha['val_mse']:.4f}")
-    print(f"  kNN          — zeta:  {knn_zeta['val_mse']:.4f}")
+    print(f"  Linear Probe — alpha: val={lp_alpha['val_mse']:.4f}  test={lp_alpha['test_mse']:.4f}")
+    print(f"  Linear Probe — zeta:  val={lp_zeta['val_mse']:.4f}  test={lp_zeta['test_mse']:.4f}")
+    print(f"  kNN          — alpha: val={knn_alpha['val_mse']:.4f}  test={knn_alpha['test_mse']:.4f}")
+    print(f"  kNN          — zeta:  val={knn_zeta['val_mse']:.4f}  test={knn_zeta['test_mse']:.4f}")
     print(f"\n  Lower is better. Random baseline ≈ 1.0 (normalized)")
+
+    # ── Save JSON ────────────────────────────────────────────────────
+    if args.output_json:
+        results = {
+            "checkpoint": str(args.checkpoint),
+            "embed_dim": int(train_emb.shape[1]),
+            "n_train": int(train_emb.shape[0]),
+            "n_val":   int(val_emb.shape[0]),
+            "n_test":  int(test_emb.shape[0]),
+            "embed_std": {
+                "train": float(train_emb.std(axis=0).mean()),
+                "val":   float(val_emb.std(axis=0).mean()),
+                "test":  float(test_emb.std(axis=0).mean()),
+            },
+            "linear_probe": {"alpha": lp_alpha, "zeta": lp_zeta},
+            "knn": {"k": cfg["k"], "alpha": knn_alpha, "zeta": knn_zeta},
+        }
+        out_path = args.output_json if isinstance(args.output_json, str) else args.output_json
+        with open(out_path, "w") as f:
+            json.dump(results, f, indent=2)
+        print(f"\n[save] results → {out_path}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", type=str, required=True, help="Path to best.pt checkpoint")
+    parser.add_argument("--output-json", type=str, default=None, help="Optional path to save results as JSON")
     args = parser.parse_args()
     evaluate(args, CONFIG)
