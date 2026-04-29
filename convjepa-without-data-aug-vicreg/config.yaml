@@ -1,36 +1,32 @@
-# Option A: conv-JEPA baseline for active_matter.
-# Mirrors train_activematter_small.yaml from the reference implementation.
+# conv-JEPA baseline for active_matter — reads raw HDF5 directly.
+# No .npy cache files.  Only pre-processing is bilinear 256→224 resize.
 
-run_name: "activematter-convjepa-baseline"
+run_name: "activematter-convjepa-direct"
 out_path: "./checkpoints"
 seed: 42
 wandb_project: "physics-jepa-baseline"
-wandb_entity: "vaibhavnyu-new-york-university" 
+wandb_entity: "vaibhavnyu-new-york-university"
 use_wandb: true
 
 # ---------------------------------------------------------------------------
-# Dataset: we import the user's ActiveMatterDataset via Python introspection.
-# Point `module` at whatever Python module your dataset class lives in; update
-# `class_name` if it differs. Extra arguments flow through as kwargs.
+# Dataset
 # ---------------------------------------------------------------------------
 dataset:
-  module: "active_matter_dataset"          # the .py filename, no extension
-  class_name: "ActiveMatterDataset"      # the class inside that file
+  module: "active_matter_dataset_no_aug"        # active_matter_dataset.py
+  class_name: "ActiveMatterDatasetNoAug"
   name: "active_matter"
   num_chans: 11
   num_frames: 16
   kwargs:
-    cache_dir: "/scratch/vc2836/DL/data/active_matter/cache"
+    data_dir: "/scratch/vc2836/DL/data/active_matter"
     num_frames: 16
-    stride: 1
-    augment: true
-    noise_std: 1.0
+    stride: 1          # non-overlapping windows (set to 1 for maximum coverage)
+    augment: false      # set true to enable random spatial roll
+    noise_std: 0.0      # Gaussian noise std; 0 = disabled
     return_physical_params: false
 
 # ---------------------------------------------------------------------------
-# Model: conv_small with 5 stages.
-#   dims=[16, 32, 64, 128, 128], res blocks=[3, 3, 3, 9, 3]
-#   encoder output: (B, 128, 14, 14); predictor preserves that shape.
+# Model  (5-stage ConvNeXt, ~3.3 M params)
 # ---------------------------------------------------------------------------
 model:
   objective: "jepa"
@@ -44,11 +40,11 @@ model:
 # ---------------------------------------------------------------------------
 train:
   num_epochs: 15
-  batch_size: 8                      # per device
-  target_global_batch_size: 256      # grad accum to reach this
+  batch_size: 8
+  target_global_batch_size: 256
   num_workers: 4
 
-  # Optimization
+  # Optimisation
   lr: 1.0e-3
   min_lr: 1.0e-6
   weight_decay: 0.05
@@ -67,9 +63,9 @@ train:
 
   # Mixed precision
   use_amp: true
-  amp_dtype: "bf16"                  # "bf16" or "fp16"
+  amp_dtype: "bf16"
 
   # Logging / checkpointing
   report_every: 50
   save_every: 2
-  val_steps: null                    # null = use full val set
+  val_steps: null

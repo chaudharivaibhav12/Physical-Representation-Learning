@@ -1,0 +1,51 @@
+{
+  "checkpoint": "/scratch/vc2836/DL/checkpoints/activematter-convjepa-direct/best.pt",
+  "pool": "mean",
+  "n_train": 175,
+  "n_val": 24,
+  "n_test": 26,
+  "feature_dim": 128,
+  "linear_probe": {
+    "train_info": {
+      "best_val_mse_normalized": 0.16772593557834625
+    },
+    "val": {
+      "mse_normalized_alpha": 0.027644626796245575,
+      "mse_normalized_zeta": 0.3078072667121887,
+      "mse_normalized_avg": 0.16772593557834625,
+      "mse_alpha": 0.05528819561004639,
+      "mse_zeta": 8.208264350891113,
+      "mse_avg": 4.131775856018066
+    },
+    "test": {
+      "mse_normalized_alpha": 0.0300611425191164,
+      "mse_normalized_zeta": 0.24462619423866272,
+      "mse_normalized_avg": 0.13734367489814758,
+      "mse_alpha": 0.06012113392353058,
+      "mse_zeta": 6.523420333862305,
+      "mse_avg": 3.2917709350585938
+    }
+  },
+  "knn": {
+    "train_info": {
+      "best_k": 3,
+      "best_val_mse_normalized": 0.21232853575956642
+    },
+    "val": {
+      "mse_normalized_alpha": 0.0930949825877,
+      "mse_normalized_zeta": 0.3315620889314328,
+      "mse_normalized_avg": 0.21232853575956642,
+      "mse_alpha": 0.1861863838334864,
+      "mse_zeta": 8.841731300496763,
+      "mse_avg": 4.513958842165124
+    },
+    "test": {
+      "mse_normalized_alpha": 0.06515021632049886,
+      "mse_normalized_zeta": 0.7735737418602026,
+      "mse_normalized_avg": 0.4193619790903508,
+      "mse_alpha": 0.1302979256190127,
+      "mse_zeta": 20.628809923763132,
+      "mse_avg": 10.379553924691074
+    }
+  }
+}

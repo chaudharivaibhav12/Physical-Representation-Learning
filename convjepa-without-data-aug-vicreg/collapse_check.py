@@ -71,8 +71,8 @@ def build_encoder_from_checkpoint(ckpt_path: Path, device: torch.device) -> Conv
 
 def build_dataset(cache_dir: Path, split: str, num_frames: int):
     import importlib
-    mod = importlib.import_module("active_matter_dataset")
-    Cls = getattr(mod, "ActiveMatterDataset")
+    mod = importlib.import_module("active_matter_dataset_no_aug")
+    Cls = getattr(mod, "ActiveMatterDatasetNoAug")
     return Cls(
         cache_dir=str(cache_dir),
         split=split,
