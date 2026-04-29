@@ -1,0 +1,51 @@
+{
+  "checkpoint": "/scratch/vc2836/DL/checkpoints/activematter-convjepa-ema/best.pt",
+  "pool": "mean",
+  "n_train": 175,
+  "n_val": 24,
+  "n_test": 26,
+  "feature_dim": 128,
+  "linear_probe": {
+    "train_info": {
+      "best_val_mse_normalized": 0.08245629817247391
+    },
+    "val": {
+      "mse_normalized_alpha": 0.01195596158504486,
+      "mse_normalized_zeta": 0.15295664966106415,
+      "mse_normalized_avg": 0.08245629817247391,
+      "mse_alpha": 0.023911455646157265,
+      "mse_zeta": 4.078878402709961,
+      "mse_avg": 2.0513949394226074
+    },
+    "test": {
+      "mse_normalized_alpha": 0.012210022658109665,
+      "mse_normalized_zeta": 0.19696560502052307,
+      "mse_normalized_avg": 0.10458780825138092,
+      "mse_alpha": 0.024419568479061127,
+      "mse_zeta": 5.252460956573486,
+      "mse_avg": 2.6384406089782715
+    }
+  },
+  "knn": {
+    "train_info": {
+      "best_k": 10,
+      "best_val_mse_normalized": 0.12541448074811015
+    },
+    "val": {
+      "mse_normalized_alpha": 0.0010020932354407465,
+      "mse_normalized_zeta": 0.2498268682607796,
+      "mse_normalized_avg": 0.12541448074811015,
+      "mse_alpha": 0.0020041478207171275,
+      "mse_zeta": 6.662106841247994,
+      "mse_avg": 3.3320554945343552
+    },
+    "test": {
+      "mse_normalized_alpha": 0.015028902083558547,
+      "mse_normalized_zeta": 0.2288603172787693,
+      "mse_normalized_avg": 0.12194460968116395,
+      "mse_alpha": 0.030057229959388684,
+      "mse_zeta": 6.102993938435467,
+      "mse_avg": 3.066525584197428
+    }
+  }
+}
