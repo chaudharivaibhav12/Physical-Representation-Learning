@@ -37,7 +37,7 @@ singularity exec --nv --overlay /scratch/vc2836/overlay-physrep.ext3:rw \
     source /ext3/miniconda3/etc/profile.d/conda.sh
     conda activate physrep
 
-    cd /scratch/vc2836/DL/Physical-Representation-Learning/ViT-JEPA
+    cd /scratch/vc2836/DL/Physical-Representation-Learning/ViT-JEPA-v2
     export PYTHONUNBUFFERED=1
 
     CKPT_DIR=/scratch/vc2836/DL/checkpoints/vit_jepa_v2
