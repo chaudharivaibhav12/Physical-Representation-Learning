@@ -1,4 +1,4 @@
-# ViT-JEPA for Active Matter Physical Simulations
+# ViT-JEPA-v2 for Active Matter Physical Simulations
 
 A 3D Vision Transformer (ViT) based Joint-Embedding Predictive Architecture for learning representations of spatiotemporal physical simulations from the **active_matter** dataset (The Well).
 
