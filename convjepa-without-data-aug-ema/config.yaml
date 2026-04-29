@@ -1,0 +1,72 @@
+# Conv-JEPA with EMA target encoder — no augmentation.
+# Replaces VICReg with EMA + pure MSE loss (I-JEPA/BYOL style).
+
+run_name: "activematter-convjepa-ema"
+out_path: "./checkpoints"
+seed: 42
+wandb_project: "physics-jepa-baseline"
+wandb_entity: "vaibhavnyu-new-york-university"
+use_wandb: true
+
+# ---------------------------------------------------------------------------
+# Dataset
+# ---------------------------------------------------------------------------
+dataset:
+  module: "active_matter_dataset_no_aug"        # active_matter_dataset.py
+  class_name: "ActiveMatterDatasetNoAug"
+  name: "active_matter"
+  num_chans: 11
+  num_frames: 16
+  kwargs:
+    data_dir: "/scratch/vc2836/DL/data/active_matter"
+    num_frames: 16
+    stride: 1          # non-overlapping windows (set to 1 for maximum coverage)
+    augment: false      # set true to enable random spatial roll
+    noise_std: 0.0      # Gaussian noise std; 0 = disabled
+    return_physical_params: false
+
+# ---------------------------------------------------------------------------
+# Model  (5-stage ConvNeXt, ~3.3 M params)
+# ---------------------------------------------------------------------------
+model:
+  objective: "jepa"
+  dims: [16, 32, 64, 128, 128]
+  num_res_blocks: [3, 3, 3, 9, 3]
+  drop_path_rate: 0.0
+  predictor_expansion: 2
+
+# ---------------------------------------------------------------------------
+# Training
+# ---------------------------------------------------------------------------
+train:
+  num_epochs: 30
+  batch_size: 8
+  target_global_batch_size: 256
+  num_workers: 4
+
+  # Optimisation
+  lr: 1.0e-3
+  min_lr: 1.0e-6
+  weight_decay: 0.05
+  betas: [0.9, 0.95]
+  grad_clip: 1.0
+
+  # Schedule
+  lr_scheduler: "cosine"
+  lr_scheduler_warmup_epochs: 1
+
+  # EMA target encoder — cosine schedule τ_start → τ_end over total training steps.
+  # τ_start=0.996: target updates 0.4% toward online encoder per step (faster early signal).
+  # τ_end=0.9999:  nearly frozen target by end of training (stable representations).
+  # These are the primary ablation parameters for the hyperparameter search.
+  ema_momentum_start: 0.996
+  ema_momentum_end: 0.9999
+
+  # Mixed precision
+  use_amp: true
+  amp_dtype: "bf16"
+
+  # Logging / checkpointing
+  report_every: 50
+  save_every: 2
+  val_steps: null
