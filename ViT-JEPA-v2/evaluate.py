@@ -27,8 +27,18 @@ from model   import ViTJEPA
 from dataset import ActiveMatterDataset
 
 
+class _NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.integer):
+            return int(obj)
+        return super().default(obj)
+
+
 CONFIG = {
-    "data_dir":    "/scratch/vc2836/DL/data/active_matter/data",
+    "data_dir":        "/scratch/vc2836/DL/data/active_matter/data",
+    "checkpoint_dir":  "/scratch/vc2836/DL/checkpoints/vit_jepa_v2",
     "num_frames":  16,
     "crop_size":   224,
     "stride":      4,
@@ -68,7 +78,8 @@ def extract_embeddings(encoder, loader, device):
 
     for batch in loader:
         ctx = batch["context"].to(device)
-        z   = encoder(ctx)                    # (B, D)
+        z   = encoder(ctx)                    # (B, num_tokens, D)
+        z   = z.mean(dim=1)                   # (B, D) — mean pool over patch tokens
         embeddings.append(z.cpu().numpy())
         alphas.append(batch["alpha"].numpy())
         zetas.append(batch["zeta"].numpy())
@@ -127,7 +138,8 @@ def train_linear_probe(
     optimizer = torch.optim.Adam(probe.parameters(), lr=lr)
 
     best_val_mse = float("inf")
-    for epoch in range(epochs):
+    best_state   = None
+    for _ in range(epochs):
         probe.train()
         pred_train = probe(X_train)
         loss       = nn.functional.mse_loss(pred_train, y_train_norm)
@@ -135,15 +147,16 @@ def train_linear_probe(
         loss.backward()
         optimizer.step()
 
-        if (epoch + 1) % 10 == 0:
-            probe.eval()
-            with torch.no_grad():
-                pred_val = probe(X_val)
-                val_mse  = nn.functional.mse_loss(pred_val, y_val_norm).item()
-            if val_mse < best_val_mse:
-                best_val_mse = val_mse
+        probe.eval()
+        with torch.no_grad():
+            val_mse = nn.functional.mse_loss(probe(X_val), y_val_norm).item()
+        if val_mse < best_val_mse:
+            best_val_mse = val_mse
+            best_state   = {k: v.clone() for k, v in probe.state_dict().items()}
 
-    # Final evaluation
+    probe.load_state_dict(best_state)
+
+    # Final evaluation using best-val checkpoint
     probe.eval()
     with torch.no_grad():
         train_mse = nn.functional.mse_loss(probe(X_train), y_train_norm).item()
@@ -229,8 +242,9 @@ def evaluate(args, cfg):
         num_frames  = cfg["num_frames"],
     ).to(device)
 
-    print(f"[LOAD] Loading checkpoint: {args.checkpoint}")
-    ckpt = torch.load(args.checkpoint, map_location=device)
+    ckpt_path = args.checkpoint or os.path.join(cfg["checkpoint_dir"], "best.pt")
+    print(f"[LOAD] Loading checkpoint: {ckpt_path}")
+    ckpt = torch.load(ckpt_path, map_location=device)
     model.encoder.load_state_dict(ckpt["encoder"])
     model.eval()
 
@@ -307,7 +321,7 @@ def evaluate(args, cfg):
     # ── Save JSON ────────────────────────────────────────────────────
     if args.output_json:
         results = {
-            "checkpoint": str(args.checkpoint),
+            "checkpoint": str(ckpt_path),
             "embed_dim": int(train_emb.shape[1]),
             "n_train": int(train_emb.shape[0]),
             "n_val":   int(val_emb.shape[0]),
@@ -320,15 +334,17 @@ def evaluate(args, cfg):
             "linear_probe": {"alpha": lp_alpha, "zeta": lp_zeta},
             "knn": {"k": cfg["k"], "alpha": knn_alpha, "zeta": knn_zeta},
         }
-        out_path = args.output_json if isinstance(args.output_json, str) else args.output_json
+        out_path = args.output_json
+        os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
         with open(out_path, "w") as f:
-            json.dump(results, f, indent=2)
+            json.dump(results, f, indent=2, cls=_NumpyEncoder)
         print(f"\n[save] results → {out_path}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--checkpoint", type=str, required=True, help="Path to best.pt checkpoint")
+    parser.add_argument("--checkpoint", type=str, default=None,
+                        help="Path to checkpoint (default: best.pt in CONFIG['checkpoint_dir'])")
     parser.add_argument("--output-json", type=str, default=None, help="Optional path to save results as JSON")
     args = parser.parse_args()
     evaluate(args, CONFIG)
