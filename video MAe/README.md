@@ -8,6 +8,113 @@ Self-supervised spatiotemporal representation learning using Masked Autoencoders
 
 VideoMAE learns representations by masking 90% of spatiotemporal patches from a physics video and training a ViT encoder to reconstruct the masked content through a lightweight decoder. After training, the decoder is discarded and the frozen encoder is evaluated via linear probe and kNN regression on two continuous physical parameters (`alpha`, `zeta`).
 
+---
+
+## Architecture Diagram
+
+### Training Pipeline
+
+```
+  Input Video
+  (B, 11, 16, 224, 224)
+         │
+         ▼
+┌─────────────────────────┐
+│    Tubelet Embedding     │  Conv3D  kernel=(2,16,16)  stride=(2,16,16)
+│                         │  maps each 2×16×16×11 tube → 192-dim token
+│  8 × 14 × 14 = 1,568    │
+│       patches           │
+└───────────┬─────────────┘
+            │  + 3D sinusoidal positional embedding
+            ▼
+┌─────────────────────────────────────────────────────┐
+│               Temporal Tube Masking  (90%)           │
+│                                                     │
+│   Spatial grid  (14 × 14 = 196 positions)           │
+│   ┌──┬──┬──┬──┬──┬──┬──┐                           │
+│   │▓▓│▓▓│░░│▓▓│▓▓│░░│▓▓│  ▓ = masked               │
+│   ├──┼──┼──┼──┼──┼──┼──┤  ░ = visible               │
+│   │▓▓│░░│▓▓│▓▓│░░│▓▓│▓▓│                           │
+│   ├──┼──┼──┼──┼──┼──┼──┤  Same spatial pattern     │
+│   │▓▓│▓▓│▓▓│░░│▓▓│▓▓│░░│  repeated across ALL      │
+│   └──┴──┴──┴──┴──┴──┴──┘  8 time steps → "tubes"   │
+│                                                     │
+│   19 visible spatial positions × 8 timesteps        │
+│   = 152 visible tokens  (out of 1,568)              │
+└──────────┬──────────────────────┬───────────────────┘
+           │ visible (152)        │ masked (1,416)
+           ▼                      │
+┌─────────────────────┐           │  (dropped — not
+│    ViT-Tiny Encoder  │           │   seen by encoder)
+│                     │           │
+│  12 × TransformerBlock          │
+│  dim=192, heads=3   │           │
+│                     │           │
+│  (B, 152, 192)  ────┼───────────┼──────────────────┐
+└─────────────────────┘           │                  │
+                                  │                  ▼
+                         ┌────────┴──────────────────────────────┐
+                         │              MAE Decoder               │
+                         │                                       │
+                         │  1. Project encoder tokens: 192 → 96  │
+                         │  2. Fill masked positions with         │
+                         │     learned [MASK] token               │
+                         │  3. Add full positional embedding      │
+                         │     to all 1,568 positions             │
+                         │  4. 4 × TransformerBlock (dim=96)     │
+                         │  5. Linear head: 96 → 5,632           │
+                         │     (= 2×16×16×11 per patch)          │
+                         │                                       │
+                         │  (B, 1,568, 5,632)                    │
+                         └───────────────────┬───────────────────┘
+                                             │
+                                             ▼
+                              ┌──────────────────────────┐
+                              │   MSE Reconstruction Loss │
+                              │                          │
+                              │  • patchify input video  │
+                              │  • normalize per-patch   │
+                              │  • MSE on masked patches │
+                              │    only (1,416 patches)  │
+                              └──────────────────────────┘
+```
+
+### Evaluation Pipeline  *(decoder discarded)*
+
+```
+  Input Video
+  (B, 11, 16, 224, 224)
+         │
+         ▼
+┌─────────────────────────┐
+│    Tubelet Embedding     │
+│    1,568 tokens          │   ← ALL patches, no masking
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Frozen ViT-Tiny Encoder │   weights locked, no gradients
+│  (B, 1,568, 192)         │
+└───────────┬─────────────┘
+            │
+            │  global average pool over 1,568 tokens
+            ▼
+    (B, 192)  representation
+            │
+     ┌──────┴──────┐
+     │             │
+     ▼             ▼
+┌─────────┐  ┌───────────┐
+│  Ridge   │  │  kNN      │
+│Regression│  │ k=20      │
+└────┬─────┘  └─────┬─────┘
+     │               │
+     └──────┬────────┘
+            ▼
+    Predict  alpha  &  zeta
+    (MSE on z-score normalized targets)
+```
+
 The key insight from the [VideoMAE paper (Tong et al., 2022)](https://arxiv.org/abs/2203.12602) is that **temporal tube masking** — masking the same spatial positions across all time steps — forces the model to learn genuine spatiotemporal dynamics rather than simply interpolating nearby frames. This makes the 90% masking ratio tractable and highly effective for video data.
 
 ---
