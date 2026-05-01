@@ -1,0 +1,94 @@
+{
+  "os": "Linux-5.14.0-570.62.1.el9_6.x86_64-x86_64-with-glibc2.35",
+  "python": "CPython 3.9.25",
+  "startedAt": "2026-04-28T02:28:01.822509Z",
+  "args": [
+    "--resume",
+    "/scratch/ok2287/checkpoints/ijepa/latest.pt"
+  ],
+  "program": "/scratch/ok2287/vit_jepa/Physical-Representation-Learning/ViT-JEPA-EMA/train.py",
+  "codePath": "ViT-JEPA-EMA/train.py",
+  "codePathLocal": "train.py",
+  "git": {
+    "remote": "https://github.com/chaudharivaibhav12/Physical-Representation-Learning.git",
+    "commit": "a09e73953ff2b9a63988bf06e3a2c39e574b72dc"
+  },
+  "email": "ok2287@nyu.edu",
+  "root": "/scratch/ok2287/vit_jepa/Physical-Representation-Learning/ViT-JEPA-EMA",
+  "host": "b-20-84",
+  "executable": "/ext3/miniconda3/envs/physrep/bin/python3.9",
+  "cpu_count": 12,
+  "cpu_count_logical": 24,
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "gpu_count": 2,
+  "disk": {
+    "/": {
+      "total": "15975645184",
+      "used": "8276410368"
+    }
+  },
+  "memory": {
+    "total": "178816565248"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA A100-SXM4-40GB",
+      "memoryTotal": "42949672960",
+      "cudaCores": 6912,
+      "architecture": "Ampere",
+      "uuid": "GPU-8de86301-56f4-5a70-8bad-5d4f686d77eb"
+    },
+    {
+      "name": "NVIDIA A100-SXM4-40GB",
+      "memoryTotal": "42949672960",
+      "cudaCores": 6912,
+      "architecture": "Ampere",
+      "uuid": "GPU-6f5f337a-7c40-8bd0-9c09-ab3b93a769c8"
+    }
+  ],
+  "cudaVersion": "13.0",
+  "slurm": {
+    "cluster_name": "(null)",
+    "conf": "/opt/slurm/data/slurmd/conf-cache/slurm.conf",
+    "cpus_on_node": "24",
+    "cpus_per_task": "8",
+    "export_env": "NONE",
+    "get_user_env": "1",
+    "gpus_on_node": "2",
+    "gpus_per_node": "2",
+    "gtids": "0",
+    "job_account": "csci_ga_2572-2026sp",
+    "job_cpus_per_node": "24",
+    "job_end_time": "1777400835",
+    "job_gid": "4666568",
+    "job_gpus": "0,1",
+    "job_id": "175424",
+    "job_name": "ijepa",
+    "job_nodelist": "b-20-84",
+    "job_num_nodes": "1",
+    "job_partition": "c24m170-a100-2",
+    "job_qos": "normal",
+    "job_start_time": "1777343235",
+    "job_uid": "4666568",
+    "job_user": "ok2287",
+    "jobid": "175424",
+    "localid": "0",
+    "mem_per_node": "65536",
+    "nnodes": "1",
+    "nodeid": "0",
+    "nodelist": "b-20-84",
+    "nprocs": "2",
+    "ntasks": "2",
+    "ntasks_per_node": "2",
+    "prio_process": "0",
+    "procid": "0",
+    "submit_dir": "/home/ok2287",
+    "submit_host": "b-9-1",
+    "task_pid": "5710",
+    "tasks_per_node": "2",
+    "topology_addr": "b-20-84",
+    "topology_addr_pattern": "node",
+    "tres_per_task": "cpu:8"
+  },
+  "writerId": "ejacdkm1d8d8y1zwoxesyns40tytghis"
+}

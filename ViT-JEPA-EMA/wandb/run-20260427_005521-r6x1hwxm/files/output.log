@@ -1,0 +1,23 @@
+[train] Found 45 files
+[train] Total samples: 8750
+[valid] Found 16 files
+[valid] Total samples: 1200
+Train: 8750 samples, 2187 batches/epoch
+Val:   1200 samples,   300 batches
+Context encoder:    11,807,616
+Predictor:           2,229,120
+Total trainable:    14,036,736  (< 100M: True)
+Accum steps: 16 | Steps/epoch: 136 | Total: 6800
+Ep   1 | Step    10 | LR 3.31e-05 | EMA 0.9960 | Loss 1.1455 | pred_norm 8.433 | tgt_norm 19.596
+wandb: WARNING Tried to log to step 10 that is less than the current step 51. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
+Ep   1 | Step    20 | LR 6.99e-05 | EMA 0.9960 | Loss 1.0106 | pred_norm 6.589 | tgt_norm 19.596
+wandb: WARNING Tried to log to step 20 that is less than the current step 51. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
+Ep   1 | Step    30 | LR 1.07e-04 | EMA 0.9960 | Loss 0.8556 | pred_norm 7.332 | tgt_norm 19.598
+wandb: WARNING Tried to log to step 30 that is less than the current step 51. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
+Ep   1 | Step    40 | LR 1.43e-04 | EMA 0.9960 | Loss 0.6808 | pred_norm 8.808 | tgt_norm 19.601
+wandb: WARNING Tried to log to step 40 that is less than the current step 51. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
+Ep   1 | Step    50 | LR 1.80e-04 | EMA 0.9960 | Loss 0.5747 | pred_norm 10.897 | tgt_norm 19.603
+  Saved: /scratch/ok2287/checkpoints/ijepa/latest.pt  (epoch 0, step 50)
+wandb: WARNING Tried to log to step 50 that is less than the current step 51. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
+
+⚠ Signal 15 received at epoch 0 step 53 — saving...

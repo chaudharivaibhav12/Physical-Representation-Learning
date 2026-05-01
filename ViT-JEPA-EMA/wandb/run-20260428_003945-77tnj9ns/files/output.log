@@ -1,0 +1,24 @@
+[vram] Peak after test forward: 928MB / 42405MB (2.2%)
+E02 S00400 | loss=0.8269  pred_norm=8.407  tgt_norm=19.569  lr=9.95e-04  step=2.53s  eta_epoch=6.0min
+[ckpt] Saved → /scratch/ok2287/checkpoints/ijepa/latest.pt  (epoch 2, step 400)
+E02 S00410 | loss=0.8382  pred_norm=8.239  tgt_norm=19.567  lr=9.94e-04  step=0.13s  eta_epoch=0.3min
+E02 S00420 | loss=0.8291  pred_norm=7.630  tgt_norm=19.561  lr=9.93e-04  step=0.12s  eta_epoch=0.2min
+E02 S00430 | loss=0.8988  pred_norm=6.153  tgt_norm=19.553  lr=9.92e-04  step=0.14s  eta_epoch=0.3min
+E02 S00440 | loss=0.8617  pred_norm=7.682  tgt_norm=19.551  lr=9.91e-04  step=0.13s  eta_epoch=0.2min
+E02 S00450 | loss=0.8024  pred_norm=8.157  tgt_norm=19.549  lr=9.90e-04  step=0.12s  eta_epoch=0.2min
+[ckpt] Saved → /scratch/ok2287/checkpoints/ijepa/latest.pt  (epoch 2, step 450)
+E02 S00460 | loss=0.8252  pred_norm=7.094  tgt_norm=19.543  lr=9.88e-04  step=0.12s  eta_epoch=0.2min
+E02 S00470 | loss=0.8386  pred_norm=7.121  tgt_norm=19.540  lr=9.87e-04  step=0.13s  eta_epoch=0.2min
+E02 S00480 | loss=0.8184  pred_norm=7.082  tgt_norm=19.535  lr=9.86e-04  step=0.13s  eta_epoch=0.1min
+E02 S00490 | loss=0.8458  pred_norm=7.080  tgt_norm=19.529  lr=9.84e-04  step=0.12s  eta_epoch=0.1min
+E02 S00500 | loss=0.8776  pred_norm=6.738  tgt_norm=19.521  lr=9.82e-04  step=0.12s  eta_epoch=0.1min
+[ckpt] Saved → /scratch/ok2287/checkpoints/ijepa/latest.pt  (epoch 2, step 500)
+E02 S00510 | loss=0.8122  pred_norm=7.264  tgt_norm=19.517  lr=9.81e-04  step=0.12s  eta_epoch=0.1min
+E02 S00520 | loss=0.8692  pred_norm=7.149  tgt_norm=19.507  lr=9.79e-04  step=0.13s  eta_epoch=0.0min
+E02 S00530 | loss=0.8288  pred_norm=8.076  tgt_norm=19.503  lr=9.77e-04  step=0.12s  eta_epoch=0.0min
+E02 S00540 | loss=0.8355  pred_norm=6.793  tgt_norm=19.496  lr=9.75e-04  step=0.12s  eta_epoch=0.0min
+[epoch 2] completed in 17.4 min
+[ckpt] Saved → /scratch/ok2287/checkpoints/ijepa/latest.pt  (epoch 2, step 542)
+E03 S00550 | loss=0.8518  pred_norm=6.760  tgt_norm=19.491  lr=9.74e-04  step=0.13s  eta_epoch=0.3min
+[ckpt] Saved → /scratch/ok2287/checkpoints/ijepa/latest.pt  (epoch 3, step 550)
+E03 S00560 | loss=0.8321  pred_norm=7.487  tgt_norm=19.483  lr=9.72e-04  step=0.12s  eta_epoch=0.2min

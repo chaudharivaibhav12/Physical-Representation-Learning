@@ -1,0 +1,14 @@
+{"time":"2026-04-27T22:28:02.583311439-04:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmp2p5gvytu/port-5822.txt","pid":5822,"detached":false,"idle-timeout":600000000000,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false,"enable-dcgm-profiling":false}
+{"time":"2026-04-27T22:28:02.583985651-04:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmp4e63aa_6/port-5823.txt","pid":5823,"detached":false,"idle-timeout":600000000000,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false,"enable-dcgm-profiling":false}
+{"time":"2026-04-27T22:28:02.584098539-04:00","level":"INFO","msg":"server: will exit if parent process dies","ppid":5822}
+{"time":"2026-04-27T22:28:02.584038156-04:00","level":"INFO","msg":"server: accepting connections","addr":{"Name":"/tmp/wandb-5822-5865-2229587458/socket","Net":"unix"}}
+{"time":"2026-04-27T22:28:02.584467726-04:00","level":"INFO","msg":"server: will exit if parent process dies","ppid":5823}
+{"time":"2026-04-27T22:28:02.584450542-04:00","level":"INFO","msg":"server: accepting connections","addr":{"Name":"/tmp/wandb-5823-5864-1504257700/socket","Net":"unix"}}
+{"time":"2026-04-27T22:28:02.676238726-04:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"1(@)"}
+{"time":"2026-04-27T22:28:02.676238529-04:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"1(@)"}
+{"time":"2026-04-27T22:28:02.688474134-04:00","level":"INFO","msg":"handleInformInit: received","streamId":"5c9rmslh","id":"1(@)"}
+{"time":"2026-04-27T22:28:02.689270266-04:00","level":"INFO","msg":"handleInformInit: received","streamId":"2ox23kcg","id":"1(@)"}
+{"time":"2026-04-27T22:28:03.112225701-04:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"5c9rmslh","id":"1(@)"}
+{"time":"2026-04-27T22:28:03.119582019-04:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"2ox23kcg","id":"1(@)"}
+{"time":"2026-04-27T22:28:09.570860858-04:00","level":"INFO","msg":"connection: cancelling request","id":"1(@)","requestId":"9gksk8zdelhs"}
+{"time":"2026-04-27T22:28:09.570905786-04:00","level":"INFO","msg":"connection: cancelling request","id":"1(@)","requestId":"ifzu73h1hw6j"}

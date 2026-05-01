@@ -1,0 +1,19 @@
+2026-04-28 08:46:27,072 INFO    MainThread:5410 [wandb_setup.py:_flush():81] Current SDK version is 0.26.0
+2026-04-28 08:46:27,072 INFO    MainThread:5410 [wandb_setup.py:_flush():81] Configure stats pid to 5410
+2026-04-28 08:46:27,072 INFO    MainThread:5410 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-04-28 08:46:27,072 INFO    MainThread:5410 [wandb_init.py:setup_run_log_directory():721] Logging user logs to /scratch/ok2287/vit_jepa/Physical-Representation-Learning/ViT-JEPA-EMA/wandb/run-20260428_084626-z67p43nu/logs/debug.log
+2026-04-28 08:46:27,072 INFO    MainThread:5410 [wandb_init.py:setup_run_log_directory():722] Logging internal logs to /scratch/ok2287/vit_jepa/Physical-Representation-Learning/ViT-JEPA-EMA/wandb/run-20260428_084626-z67p43nu/logs/debug-internal.log
+2026-04-28 08:46:27,072 INFO    MainThread:5410 [wandb_init.py:init():848] calling init triggers
+2026-04-28 08:46:27,072 INFO    MainThread:5410 [wandb_init.py:init():853] wandb.init called with sweep_config: {}
+config: {'data_dir': '/scratch/ok2287/data/active_matter/data', 'ckpt_dir': '/scratch/ok2287/checkpoints/ijepa', 'num_frames': 4, 'epochs': 20, 'batch_size': 16, 'lr': 0.001, 'min_lr': 1e-06, 'warmup_epochs': 2, 'weight_decay_start': 0.04, 'weight_decay_end': 0.4, 'grad_clip': 1.0, 'ckpt_every': 50, 'ema_start': 0.996, 'ema_end': 1.0, 'in_channels': 11, 'img_size': 224, 'patch_size': 32, 'encoder_dim': 384, 'encoder_depth': 12, 'encoder_heads': 6, 'predictor_dim': 192, 'predictor_depth': 6, 'predictor_heads': 6, 'num_target_blocks': 4, 'target_scale': (0.15, 0.2), 'target_ratio': (0.75, 1.5), 'context_scale': (0.85, 1.0), 'num_workers': 4, 'log_every': 10, 'wandb_project': 'ijepa-active-matter', '_wandb': {}}
+2026-04-28 08:46:27,072 INFO    MainThread:5410 [wandb_init.py:init():896] starting backend
+2026-04-28 08:46:28,087 INFO    MainThread:5410 [wandb_init.py:init():911] sending inform_init request
+2026-04-28 08:46:28,092 INFO    MainThread:5410 [wandb_init.py:init():919] backend started and connected
+2026-04-28 08:46:28,177 INFO    MainThread:5410 [wandb_init.py:init():989] updated telemetry
+2026-04-28 08:46:28,317 INFO    MainThread:5410 [wandb_init.py:init():1013] communicating run to backend with 90.0 second timeout
+2026-04-28 08:46:29,451 INFO    MainThread:5410 [wandb_init.py:init():1058] starting run threads in backend
+2026-04-28 08:46:30,045 INFO    MainThread:5410 [wandb_run.py:_console_start():2542] atexit reg
+2026-04-28 08:46:30,045 INFO    MainThread:5410 [wandb_run.py:_redirect():2391] redirect: wrap_raw
+2026-04-28 08:46:30,046 INFO    MainThread:5410 [wandb_run.py:_redirect():2460] Wrapping output streams.
+2026-04-28 08:46:30,046 INFO    MainThread:5410 [wandb_run.py:_redirect():2483] Redirects installed.
+2026-04-28 08:46:30,049 INFO    MainThread:5410 [wandb_init.py:init():1098] run started, returning control to user process

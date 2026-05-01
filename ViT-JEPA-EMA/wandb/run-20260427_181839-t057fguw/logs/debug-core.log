@@ -1,0 +1,8 @@
+{"time":"2026-04-27T18:18:40.3832216-04:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmpbzcs69vp/port-5429.txt","pid":5429,"detached":false,"idle-timeout":600000000000,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false,"enable-dcgm-profiling":false}
+{"time":"2026-04-27T18:18:40.383959131-04:00","level":"INFO","msg":"server: will exit if parent process dies","ppid":5429}
+{"time":"2026-04-27T18:18:40.383940439-04:00","level":"INFO","msg":"server: accepting connections","addr":{"Name":"/tmp/wandb-5429-5464-1909331375/socket","Net":"unix"}}
+{"time":"2026-04-27T18:18:40.439719749-04:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"1(@)"}
+{"time":"2026-04-27T18:18:40.447820197-04:00","level":"INFO","msg":"handleInformInit: received","streamId":"t057fguw","id":"1(@)"}
+{"time":"2026-04-27T18:18:40.818759613-04:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"t057fguw","id":"1(@)"}
+{"time":"2026-04-27T18:18:47.269140479-04:00","level":"INFO","msg":"connection: cancelling request","id":"1(@)","requestId":"ejg9myzbspez"}
+{"time":"2026-04-27T18:41:03.872268471-04:00","level":"INFO","msg":"main: received shutdown signal","signal":15}

@@ -1,0 +1,8 @@
+{"time":"2026-04-28T06:15:08.399036023-04:00","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmpwem028yu/port-5398.txt","pid":5398,"detached":false,"idle-timeout":600000000000,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false,"enable-dcgm-profiling":false}
+{"time":"2026-04-28T06:15:08.399708427-04:00","level":"INFO","msg":"server: will exit if parent process dies","ppid":5398}
+{"time":"2026-04-28T06:15:08.399692937-04:00","level":"INFO","msg":"server: accepting connections","addr":{"Name":"/tmp/wandb-5398-5462-946282752/socket","Net":"unix"}}
+{"time":"2026-04-28T06:15:08.469272319-04:00","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"1(@)"}
+{"time":"2026-04-28T06:15:08.48080085-04:00","level":"INFO","msg":"handleInformInit: received","streamId":"51wfh30n","id":"1(@)"}
+{"time":"2026-04-28T06:15:09.166984332-04:00","level":"INFO","msg":"handleInformInit: stream started","streamId":"51wfh30n","id":"1(@)"}
+{"time":"2026-04-28T06:15:15.689611904-04:00","level":"INFO","msg":"connection: cancelling request","id":"1(@)","requestId":"txvuxb7gymh6"}
+{"time":"2026-04-28T06:41:03.420913668-04:00","level":"INFO","msg":"main: received shutdown signal","signal":15}

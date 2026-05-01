@@ -1,0 +1,1657 @@
+2026-04-27 19:15:41,742 INFO    MainThread:5424 [wandb_setup.py:_flush():81] Current SDK version is 0.26.0
+2026-04-27 19:15:41,743 INFO    MainThread:5424 [wandb_setup.py:_flush():81] Configure stats pid to 5424
+2026-04-27 19:15:41,743 INFO    MainThread:5424 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-04-27 19:15:41,743 INFO    MainThread:5424 [wandb_init.py:setup_run_log_directory():721] Logging user logs to /scratch/ok2287/vit_jepa/Physical-Representation-Learning/ViT-JEPA-EMA/wandb/run-20260427_191541-t057fguw/logs/debug.log
+2026-04-27 19:15:41,743 INFO    MainThread:5424 [wandb_init.py:setup_run_log_directory():722] Logging internal logs to /scratch/ok2287/vit_jepa/Physical-Representation-Learning/ViT-JEPA-EMA/wandb/run-20260427_191541-t057fguw/logs/debug-internal.log
+2026-04-27 19:15:41,743 INFO    MainThread:5424 [wandb_init.py:init():848] calling init triggers
+2026-04-27 19:15:41,743 INFO    MainThread:5424 [wandb_init.py:init():853] wandb.init called with sweep_config: {}
+config: {'data_dir': '/scratch/ok2287/data/active_matter/data', 'ckpt_dir': '/scratch/ok2287/checkpoints/ijepa', 'stride': 1, 'num_frames': 8, 'epochs': 50, 'batch_size': 4, 'target_global_batch': 64, 'lr': 0.001, 'min_lr': 1e-06, 'warmup_epochs': 2, 'weight_decay_start': 0.04, 'weight_decay_end': 0.4, 'grad_clip': 1.0, 'ema_start': 0.996, 'ema_end': 1.0, 'in_channels': 11, 'img_size': 224, 'patch_size': 16, 'encoder_dim': 384, 'encoder_depth': 6, 'encoder_heads': 6, 'predictor_dim': 192, 'predictor_depth': 4, 'predictor_heads': 4, 'num_target_blocks': 4, 'target_scale': (0.15, 0.2), 'target_ratio': (0.75, 1.5), 'context_scale': (0.85, 1.0), 'save_steps': 30, 'save_every': 5, 'log_every': 10, 'wandb_project': 'ijepa-active-matter', 'run_name': 'ijepa-vits-p16-d6-ddp', '_wandb': {}}
+2026-04-27 19:15:41,743 INFO    MainThread:5424 [wandb_init.py:init():896] starting backend
+2026-04-27 19:15:42,477 INFO    MainThread:5424 [wandb_init.py:init():911] sending inform_init request
+2026-04-27 19:15:42,482 INFO    MainThread:5424 [wandb_init.py:init():919] backend started and connected
+2026-04-27 19:15:42,564 INFO    MainThread:5424 [wandb_init.py:init():989] updated telemetry
+2026-04-27 19:15:42,636 INFO    MainThread:5424 [wandb_init.py:init():1013] communicating run to backend with 90.0 second timeout
+2026-04-27 19:15:43,120 INFO    MainThread:5424 [wandb_init.py:init():1053] run resumed
+2026-04-27 19:15:43,122 INFO    MainThread:5424 [wandb_init.py:init():1058] starting run threads in backend
+2026-04-27 19:15:43,451 INFO    MainThread:5424 [wandb_run.py:_console_start():2542] atexit reg
+2026-04-27 19:15:43,451 INFO    MainThread:5424 [wandb_run.py:_redirect():2391] redirect: wrap_raw
+2026-04-27 19:15:43,452 INFO    MainThread:5424 [wandb_run.py:_redirect():2460] Wrapping output streams.
+2026-04-27 19:15:43,452 INFO    MainThread:5424 [wandb_run.py:_redirect():2483] Redirects installed.
+2026-04-27 19:15:43,454 INFO    MainThread:5424 [wandb_init.py:init():1098] run started, returning control to user process
+2026-04-27 19:41:04,142 ERROR   wandb-AsyncioManager-main:5424 [service_client.py:_forward_responses():131] Error reading server response.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,155 INFO    wandb-AsyncioManager-main:5424 [mailbox.py:close():155] Closing mailbox, abandoning 1 handles.
+2026-04-27 19:41:04,191 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,198 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,198 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,198 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,199 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,199 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,199 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,200 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,200 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,200 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,200 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,200 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,201 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,201 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,201 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,201 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,201 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,202 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,202 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,202 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,202 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,202 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,202 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,203 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,203 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,203 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,203 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,203 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,203 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,204 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,204 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,204 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,204 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,204 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,204 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,204 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,205 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,205 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,205 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,205 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,205 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,205 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,206 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,206 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,207 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,207 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,208 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,209 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,214 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,215 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,215 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,216 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,217 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,218 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,219 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,219 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,220 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,221 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,222 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,224 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,224 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,226 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,226 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,227 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2026-04-27 19:41:04,227 ERROR   wandb-AsyncioManager-main:5424 [asyncio_manager.py:fn_wrap_exceptions():184] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/asyncio_manager.py", line 182, in fn_wrap_exceptions
+    await fn()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 45, in publish
+    await self._send_server_request(request)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 78, in _send_server_request
+    raise self._broken_exc.with_traceback(self._broken_tb)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 87, in _send_server_request
+    await self._drain_writer()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 104, in _drain_writer
+    await self._writer.drain()
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 375, in drain
+    raise exc
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 127, in _forward_responses
+    while response := await self._read_server_response():
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/site-packages/wandb/sdk/lib/service/service_client.py", line 141, in _read_server_response
+    header = await self._reader.readexactly(_HEADER_BYTE_INT_LEN)
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "/ext3/miniconda3/envs/physrep/lib/python3.9/asyncio/selector_events.py", line 854, in _read_ready__data_received
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer

@@ -1,0 +1,155 @@
+_wandb:
+    value:
+        cli_version: 0.26.0
+        e:
+            2u5m24cnec2j4sfp8641gt3s9p7qdcc4:
+                codePath: ViT-JEPA-EMA/train.py
+                codePathLocal: train.py
+                cpu_count: 6
+                cpu_count_logical: 12
+                cudaVersion: "13.0"
+                disk:
+                    /:
+                        total: "15975645184"
+                        used: "8276410368"
+                email: ok2287@nyu.edu
+                executable: /ext3/miniconda3/envs/physrep/bin/python
+                git:
+                    commit: a09e73953ff2b9a63988bf06e3a2c39e574b72dc
+                    remote: https://github.com/chaudharivaibhav12/Physical-Representation-Learning.git
+                gpu: NVIDIA A100-SXM4-40GB
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 6912
+                      memoryTotal: "42949672960"
+                      name: NVIDIA A100-SXM4-40GB
+                      uuid: GPU-a00fd7b5-bcae-6280-f616-81e4f2167351
+                host: b-19-9
+                memory:
+                    total: "89078554624"
+                os: Linux-5.14.0-570.62.1.el9_6.x86_64-x86_64-with-glibc2.35
+                program: /scratch/ok2287/vit_jepa/Physical-Representation-Learning/ViT-JEPA-EMA/train.py
+                python: CPython 3.9.25
+                root: /scratch/ok2287/vit_jepa/Physical-Representation-Learning/ViT-JEPA-EMA
+                slurm:
+                    cluster_name: (null)
+                    conf: /opt/slurm/data/slurmd/conf-cache/slurm.conf
+                    cpus_on_node: "12"
+                    cpus_per_task: "8"
+                    export_env: NONE
+                    get_user_env: "1"
+                    gpus_on_node: "1"
+                    gpus_per_node: "1"
+                    gtids: "0"
+                    job_account: csci_ga_2572-2026sp
+                    job_cpus_per_node: "12"
+                    job_end_time: "1777312096"
+                    job_gid: "4666568"
+                    job_gpus: "0"
+                    job_id: "174296"
+                    job_name: vit_jepa_ema
+                    job_nodelist: b-19-9
+                    job_num_nodes: "1"
+                    job_partition: c12m85-a100-1
+                    job_qos: normal
+                    job_start_time: "1777254496"
+                    job_uid: "4666568"
+                    job_user: ok2287
+                    jobid: "174296"
+                    localid: "0"
+                    mem_per_node: "32768"
+                    nnodes: "1"
+                    nodeid: "0"
+                    nodelist: b-19-9
+                    nprocs: "1"
+                    ntasks: "1"
+                    ntasks_per_node: "1"
+                    prio_process: "0"
+                    procid: "0"
+                    submit_dir: /scratch/ok2287/logs
+                    submit_host: b-9-24
+                    task_pid: "5364"
+                    tasks_per_node: "1"
+                    topology_addr: b-19-9
+                    topology_addr_pattern: node
+                    tres_per_task: cpu:8
+                startedAt: "2026-04-27T01:48:51.286826Z"
+                writerId: 2u5m24cnec2j4sfp8641gt3s9p7qdcc4
+        m: []
+        python_version: 3.9.25
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "3":
+                - 16
+            "4": 3.9.25
+            "5": 0.26.0
+            "12": 0.26.0
+            "13": linux-x86_64
+batch_size:
+    value: 32
+ckpt_dir:
+    value: /scratch/ok2287/checkpoints/ijepa
+context_scale:
+    value:
+        - 0.85
+        - 1
+data_dir:
+    value: /scratch/ok2287/data/active_matter/data
+ema_end:
+    value: 1
+ema_start:
+    value: 0.996
+encoder_depth:
+    value: 12
+encoder_dim:
+    value: 384
+encoder_heads:
+    value: 6
+epochs:
+    value: 20
+grad_clip:
+    value: 1
+img_size:
+    value: 224
+in_channels:
+    value: 11
+log_every:
+    value: 10
+lr:
+    value: 0.001
+min_lr:
+    value: 1e-06
+num_frames:
+    value: 8
+num_target_blocks:
+    value: 4
+num_workers:
+    value: 4
+patch_size:
+    value: 16
+predictor_depth:
+    value: 6
+predictor_dim:
+    value: 192
+predictor_heads:
+    value: 6
+target_ratio:
+    value:
+        - 0.75
+        - 1.5
+target_scale:
+    value:
+        - 0.15
+        - 0.2
+wandb_project:
+    value: ijepa-active-matter
+warmup_epochs:
+    value: 2
+weight_decay_end:
+    value: 0.4
+weight_decay_start:
+    value: 0.04

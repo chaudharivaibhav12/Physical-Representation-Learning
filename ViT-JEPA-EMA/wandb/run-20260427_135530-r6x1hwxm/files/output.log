@@ -1,0 +1,13 @@
+[train] Found 45 files
+[train] Total samples: 8750
+[valid] Found 16 files
+[valid] Total samples: 1200
+Train: 8750 samples, 2187 batches/epoch
+Val:   1200 samples,   300 batches
+Context encoder:    11,807,616
+Predictor:           2,229,120
+Total trainable:    14,036,736  (< 100M: True)
+Accum steps: 16 | Steps/epoch: 136 | Total: 6800
+Loading checkpoint: /scratch/ok2287/checkpoints/ijepa/latest.pt
+  Resumed from epoch 0, step 50, best_val_loss=inf
+  Skipping 800 batches (already processed this epoch)

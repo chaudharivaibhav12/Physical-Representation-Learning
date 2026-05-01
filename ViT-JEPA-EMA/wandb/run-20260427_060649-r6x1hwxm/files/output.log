@@ -1,0 +1,16 @@
+[train] Found 45 files
+[train] Total samples: 8750
+[valid] Found 16 files
+[valid] Total samples: 1200
+Train: 8750 samples, 2187 batches/epoch
+Val:   1200 samples,   300 batches
+Context encoder:    11,807,616
+Predictor:           2,229,120
+Total trainable:    14,036,736  (< 100M: True)
+Accum steps: 16 | Steps/epoch: 136 | Total: 6800
+Ep   1 | Step    10 | LR 3.31e-05 | EMA 0.9960 | Loss 1.1470 | pred_norm 8.376 | tgt_norm 19.596
+wandb: WARNING Tried to log to step 10 that is less than the current step 61. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
+Ep   1 | Step    20 | LR 6.99e-05 | EMA 0.9960 | Loss 1.0104 | pred_norm 6.591 | tgt_norm 19.596
+wandb: WARNING Tried to log to step 20 that is less than the current step 61. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
+Ep   1 | Step    30 | LR 1.07e-04 | EMA 0.9960 | Loss 0.8497 | pred_norm 7.331 | tgt_norm 19.598
+wandb: WARNING Tried to log to step 30 that is less than the current step 61. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.

@@ -1,0 +1,20 @@
+[train] Found 45 files
+[train] Total samples: 8750
+[valid] Found 16 files
+[valid] Total samples: 1200
+Train: 8750 samples | 2187 batches/epoch/GPU
+Val:   1200 samples
+Context encoder:    11,807,616
+Predictor:           2,229,120
+Total trainable:    14,036,736  (< 100M: True)
+World size: 1 | Accum steps: 16 | Effective batch: 64 | Steps/epoch: 136
+Loading checkpoint: /scratch/ok2287/checkpoints/ijepa/latest.pt
+Loading: /scratch/ok2287/checkpoints/ijepa/latest.pt  (205.9MB)
+  Keys: ['epoch', 'global_step', 'model', 'opt', 'best_val_loss', 'cfg']
+  Resumed: epoch=0, step=30, best_val_loss=inf
+  Fast-skipping 480/2187 batches...
+Ep   1 | Step    40 | LR 1.43e-04 | EMA 0.9960 | Loss 0.6788 | pred_norm 8.831 | tgt_norm 19.601
+wandb: WARNING Tried to log to step 40 that is less than the current step 41. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
+Ep   1 | Step    50 | LR 1.80e-04 | EMA 0.9960 | Loss 0.5699 | pred_norm 10.923 | tgt_norm 19.604
+
+⚠ Signal 15 at epoch=0 step=54 — saving...

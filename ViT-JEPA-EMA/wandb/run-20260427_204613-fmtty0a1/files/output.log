@@ -1,0 +1,17 @@
+[vram] Peak after test forward: 472MB / 42405MB (1.1%)
+E00 S00000 | loss=1.3703  pred_norm=11.843  tgt_norm=19.596  lr=0.00e+00  step=0.88s  eta_epoch=4.2min
+E00 S00010 | loss=1.1358  pred_norm=8.974  tgt_norm=19.596  lr=1.76e-05  step=0.10s  eta_epoch=0.5min
+E00 S00020 | loss=1.0263  pred_norm=7.734  tgt_norm=19.596  lr=3.52e-05  step=0.10s  eta_epoch=0.4min
+E00 S00030 | loss=0.9583  pred_norm=6.769  tgt_norm=19.596  lr=5.28e-05  step=0.10s  eta_epoch=0.4min
+E00 S00040 | loss=0.9000  pred_norm=6.528  tgt_norm=19.596  lr=7.04e-05  step=0.11s  eta_epoch=0.5min
+E00 S00050 | loss=0.8514  pred_norm=6.865  tgt_norm=19.596  lr=8.80e-05  step=0.10s  eta_epoch=0.4min
+[ckpt] Saved → /scratch/ok2287/checkpoints/ijepa/latest.pt  (epoch 0, step 50)
+E00 S00060 | loss=0.8006  pred_norm=7.756  tgt_norm=19.596  lr=1.06e-04  step=0.10s  eta_epoch=0.4min
+E00 S00070 | loss=0.7272  pred_norm=9.131  tgt_norm=19.596  lr=1.23e-04  step=0.11s  eta_epoch=0.4min
+E00 S00080 | loss=0.6975  pred_norm=10.551  tgt_norm=19.596  lr=1.41e-04  step=0.11s  eta_epoch=0.4min
+E00 S00090 | loss=0.6528  pred_norm=11.631  tgt_norm=19.596  lr=1.58e-04  step=0.11s  eta_epoch=0.4min
+E00 S00100 | loss=0.5916  pred_norm=12.371  tgt_norm=19.596  lr=1.76e-04  step=0.11s  eta_epoch=0.3min
+[ckpt] Saved → /scratch/ok2287/checkpoints/ijepa/latest.pt  (epoch 0, step 100)
+E00 S00110 | loss=0.5778  pred_norm=12.795  tgt_norm=19.596  lr=1.94e-04  step=0.11s  eta_epoch=0.3min
+E00 S00120 | loss=0.5468  pred_norm=13.157  tgt_norm=19.596  lr=2.11e-04  step=0.10s  eta_epoch=0.3min
+E00 S00130 | loss=0.5277  pred_norm=13.433  tgt_norm=19.596  lr=2.29e-04  step=0.10s  eta_epoch=0.3min

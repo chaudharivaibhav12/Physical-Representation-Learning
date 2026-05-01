@@ -1,0 +1,18 @@
+Started new wandb run: r6x1hwxm
+[train] Found 45 files
+[train] Total samples: 8750
+[valid] Found 16 files
+[valid] Total samples: 1200
+Train: 8750 samples, 2187 batches/epoch
+Val:   1200 samples,   300 batches
+Context encoder:    11,807,616
+Predictor:           2,229,120
+Total trainable:    14,036,736  (< 100M: True)
+Accum steps: 16 | Steps/epoch: 136 | Total: 6800
+Ep   1 | Step    10 | LR 3.31e-05 | EMA 0.9960 | Loss 1.1451 | pred_norm 8.355 | tgt_norm 19.596
+Ep   1 | Step    20 | LR 6.99e-05 | EMA 0.9960 | Loss 1.0093 | pred_norm 6.644 | tgt_norm 19.596
+Ep   1 | Step    30 | LR 1.07e-04 | EMA 0.9960 | Loss 0.8533 | pred_norm 7.358 | tgt_norm 19.598
+Ep   1 | Step    40 | LR 1.43e-04 | EMA 0.9960 | Loss 0.6758 | pred_norm 8.797 | tgt_norm 19.601
+Ep   1 | Step    50 | LR 1.80e-04 | EMA 0.9960 | Loss 0.5757 | pred_norm 10.914 | tgt_norm 19.604
+  Saved: /scratch/ok2287/checkpoints/ijepa/latest.pt  (epoch 0, step 50)
+Ep   1 | Step    60 | LR 2.17e-04 | EMA 0.9960 | Loss 0.4876 | pred_norm 13.343 | tgt_norm 19.606

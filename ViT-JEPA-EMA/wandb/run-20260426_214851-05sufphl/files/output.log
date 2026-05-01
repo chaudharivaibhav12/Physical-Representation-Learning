@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/scratch/ok2287/vit_jepa/Physical-Representation-Learning/ViT-JEPA-EMA/train.py", line 298, in <module>
+    main()
+  File "/scratch/ok2287/vit_jepa/Physical-Representation-Learning/ViT-JEPA-EMA/train.py", line 260, in main
+    loss, metrics = model(x, masks)
+  File "/home/ok2287/.local/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/ok2287/.local/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/scratch/ok2287/vit_jepa/Physical-Representation-Learning/ViT-JEPA-EMA/model.py", line 380, in forward
+    context_tokens = self.context_encoder(x, mask_keep=context_mask)  # (B, N_ctx, D)
+  File "/home/ok2287/.local/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/ok2287/.local/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/scratch/ok2287/vit_jepa/Physical-Representation-Learning/ViT-JEPA-EMA/model.py", line 180, in forward
+    tokens = tokens[mask_keep].reshape(B, -1, D)
+RuntimeError: shape '[32, -1, 384]' is invalid for input of size 8346624
