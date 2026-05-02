@@ -12,6 +12,7 @@ Usage:
 """
 
 import os
+import json
 import argparse
 import numpy as np
 import torch
@@ -233,14 +234,21 @@ def evaluate(args, cfg):
     knn_zeta  = evaluate_knn(train_emb, train_zeta,  val_emb, val_zeta,  k=cfg["k"], label="zeta")
 
     # ── Test set (final eval only) ────────────────────────────────────
+    test_results = {}
     if args.test:
         print("\n" + "=" * 55)
         print("TEST SET (final evaluation)")
         print("=" * 55)
-        evaluate_knn(train_emb, train_alpha, test_emb, test_alpha, k=cfg["k"], label="alpha")
-        evaluate_knn(train_emb, train_zeta,  test_emb, test_zeta,  k=cfg["k"], label="zeta")
-        train_linear_probe(train_emb, train_alpha, test_emb, test_alpha, cfg["embed_dim"], label="alpha")
-        train_linear_probe(train_emb, train_zeta,  test_emb, test_zeta,  cfg["embed_dim"], label="zeta")
+        test_knn_alpha = evaluate_knn(train_emb, train_alpha, test_emb, test_alpha, k=cfg["k"], label="alpha")
+        test_knn_zeta  = evaluate_knn(train_emb, train_zeta,  test_emb, test_zeta,  k=cfg["k"], label="zeta")
+        test_lp_alpha  = train_linear_probe(train_emb, train_alpha, test_emb, test_alpha, cfg["embed_dim"], label="alpha")
+        test_lp_zeta   = train_linear_probe(train_emb, train_zeta,  test_emb, test_zeta,  cfg["embed_dim"], label="zeta")
+        test_results = {
+            "linear_alpha_mse": test_lp_alpha["val_mse"],
+            "linear_zeta_mse":  test_lp_zeta["val_mse"],
+            "knn_alpha_mse":    test_knn_alpha["val_mse"],
+            "knn_zeta_mse":     test_knn_zeta["val_mse"],
+        }
 
     # ── Summary ───────────────────────────────────────────────────────
     print("\n" + "=" * 55)
@@ -251,6 +259,26 @@ def evaluate(args, cfg):
     print(f"  kNN          — alpha: {knn_alpha['val_mse']:.4f}")
     print(f"  kNN          — zeta:  {knn_zeta['val_mse']:.4f}")
     print(f"\n  Lower is better.  Random baseline ≈ 1.0 (normalized)")
+
+    payload = {
+        "checkpoint": args.checkpoint,
+        "val": {
+            "linear_alpha_mse": lp_alpha["val_mse"],
+            "linear_zeta_mse":  lp_zeta["val_mse"],
+            "knn_alpha_mse":    knn_alpha["val_mse"],
+            "knn_zeta_mse":     knn_zeta["val_mse"],
+        },
+    }
+    if test_results:
+        payload["test"] = test_results
+
+    out_path = os.path.join(
+        os.path.dirname(args.checkpoint),
+        f"eval_{os.path.splitext(os.path.basename(args.checkpoint))[0]}.json"
+    )
+    with open(out_path, "w") as f:
+        json.dump(payload, f, indent=2)
+    print(f"\nsaved results → {out_path}")
 
 
 if __name__ == "__main__":
