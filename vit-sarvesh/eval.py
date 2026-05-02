@@ -7,6 +7,8 @@ Usage:
 """
 
 import argparse
+import json
+import os
 import numpy as np
 import torch
 import yaml
@@ -134,9 +136,23 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint", type=str, required=True)
     parser.add_argument("--split",      type=str, default="valid", choices=["valid", "test"])
     parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--out",        type=str, default=None, help="Path to save results JSON")
     args = parser.parse_args()
 
     with open(args.config) as f:
         cfg = yaml.safe_load(f)
 
-    evaluate(cfg, args.checkpoint, args.split, args.batch_size)
+    results = evaluate(cfg, args.checkpoint, args.split, args.batch_size)
+
+    out_path = args.out or os.path.join(
+        os.path.dirname(args.checkpoint),
+        f"eval_{args.split}_{os.path.splitext(os.path.basename(args.checkpoint))[0]}.json"
+    )
+    payload = {
+        "checkpoint": args.checkpoint,
+        "split":      args.split,
+        "results":    {k: float(v) for k, v in results.items()},
+    }
+    with open(out_path, "w") as f:
+        json.dump(payload, f, indent=2)
+    print(f"\nsaved results → {out_path}")
