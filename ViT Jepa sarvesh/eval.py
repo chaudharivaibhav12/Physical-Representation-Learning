@@ -1,14 +1,22 @@
 """
-Evaluation for ViT-JEPA: linear probe + kNN regression on alpha and zeta.
+ViT-JEPA Evaluation — Linear Probe + kNN Regression
+=====================================================
+Loads the frozen ViT-JEPA context encoder from a checkpoint and evaluates
+representation quality by predicting alpha and zeta using:
+  1. Linear probe  — Ridge regression (sklearn)
+  2. kNN           — k-Nearest Neighbours regression (k=20, cosine)
+
+Targets are z-score normalized (train statistics).  MSE reported for both
+val and test splits in a single run.
 
 Usage:
   python eval.py --checkpoint /scratch/sb10583/checkpoints/vit-jepa-sarvesh/best.pt
-  python eval.py --checkpoint best.pt --split test
 """
 
 import argparse
 import json
 import os
+
 import numpy as np
 import torch
 import yaml
@@ -21,6 +29,10 @@ from sklearn.metrics import mean_squared_error
 from dataset import ActiveMatterDataset
 from model   import ViTJEPA
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Embedding extraction
+# ─────────────────────────────────────────────────────────────────────────────
 
 @torch.no_grad()
 def extract_embeddings(model, loader, device):
@@ -36,20 +48,54 @@ def extract_embeddings(model, loader, device):
         zs.append(z.float().cpu().numpy())
         alphas.append(batch["alpha"].numpy())
         zetas.append(batch["zeta"].numpy())
-    return (
-        np.concatenate(zs),
-        np.concatenate(alphas),
-        np.concatenate(zetas),
-    )
+    return np.concatenate(zs), np.concatenate(alphas), np.concatenate(zetas)
 
 
-def evaluate(cfg, checkpoint_path, split, batch_size=32):
-    device    = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    use_cuda  = torch.cuda.is_available()
+# ─────────────────────────────────────────────────────────────────────────────
+# Probe + kNN on one target variable
+# ─────────────────────────────────────────────────────────────────────────────
+
+def probe_and_knn(X_tr, X_val, X_test, y_tr, y_val, y_test, label, k=20):
+    mu, sigma  = y_tr.mean(), y_tr.std() + 1e-8
+    y_tr_n     = (y_tr   - mu) / sigma
+    y_val_n    = (y_val  - mu) / sigma
+    y_test_n   = (y_test - mu) / sigma
+
+    scaler   = StandardScaler()
+    X_tr_s   = scaler.fit_transform(X_tr)
+    X_val_s  = scaler.transform(X_val)
+    X_test_s = scaler.transform(X_test)
+
+    ridge = Ridge(alpha=1.0)
+    ridge.fit(X_tr_s, y_tr_n)
+    lp_val  = mean_squared_error(y_val_n,  ridge.predict(X_val_s))
+    lp_test = mean_squared_error(y_test_n, ridge.predict(X_test_s))
+
+    knn = KNeighborsRegressor(n_neighbors=k, metric="cosine", n_jobs=-1)
+    knn.fit(X_tr_s, y_tr_n)
+    knn_val  = mean_squared_error(y_val_n,  knn.predict(X_val_s))
+    knn_test = mean_squared_error(y_test_n, knn.predict(X_test_s))
+
+    print(f"  Linear [{label:5s}] → Val: {lp_val:.4f}  Test: {lp_test:.4f}")
+    print(f"  kNN    [{label:5s}] → Val: {knn_val:.4f}  Test: {knn_test:.4f}")
+    return lp_val, lp_test, knn_val, knn_test
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Main
+# ─────────────────────────────────────────────────────────────────────────────
+
+def main(args):
+    device      = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    use_cuda    = device.type == "cuda"
     num_workers = 4 if use_cuda else 0
+    print(f"Device: {device}\n")
 
-    # ── Load model ────────────────────────────────────────────────────────────
+    # ── Load config + model ───────────────────────────────────────────────────
+    with open(args.config) as f:
+        cfg = yaml.safe_load(f)
     m = cfg["model"]
+
     model = ViTJEPA(
         in_channels=m["in_channels"],
         embed_dim=m["embed_dim"],
@@ -64,95 +110,100 @@ def evaluate(cfg, checkpoint_path, split, batch_size=32):
         pred_heads=m["pred_heads"],
     ).to(device)
 
-    ckpt = torch.load(checkpoint_path, map_location=device)
+    ckpt = torch.load(args.checkpoint, map_location=device)
     model.load_state_dict(ckpt["model"])
     model.eval()
     for param in model.parameters():
         param.requires_grad = False
-    print(f"loaded checkpoint: {checkpoint_path}  [encoder frozen]")
+    print(f"Loaded checkpoint: {args.checkpoint}  [encoder frozen]")
 
-    # ── Extract embeddings ────────────────────────────────────────────────────
+    # ── Datasets ──────────────────────────────────────────────────────────────
     d = cfg["data"]
 
-    def make_loader(sp):
-        ds = ActiveMatterDataset(d["data_dir"], split=sp, stride=d["stride"], noise_std=0.0, augment=False)
-        return DataLoader(ds, batch_size=batch_size, shuffle=False,
+    def make_loader(split):
+        ds = ActiveMatterDataset(
+            d["data_dir"], split=split, stride=d["stride"], noise_std=0.0, augment=False
+        )
+        return DataLoader(ds, batch_size=args.batch_size, shuffle=False,
                           num_workers=num_workers, pin_memory=use_cuda)
 
-    print("extracting train embeddings...")
-    Z_tr, alpha_tr, zeta_tr = extract_embeddings(model, make_loader("train"), device)
+    # ── Extract embeddings ────────────────────────────────────────────────────
+    print("\n" + "═" * 55)
+    print("EXTRACTING EMBEDDINGS")
+    print("═" * 55)
+    print("Extracting train embeddings...")
+    X_tr, alpha_tr, zeta_tr = extract_embeddings(model, make_loader("train"), device)
+    print("Extracting val embeddings...")
+    X_val, alpha_val, zeta_val = extract_embeddings(model, make_loader("valid"), device)
+    print("Extracting test embeddings...")
+    X_test, alpha_test, zeta_test = extract_embeddings(model, make_loader("test"), device)
 
-    print(f"extracting {split} embeddings...")
-    Z_ev, alpha_ev, zeta_ev = extract_embeddings(model, make_loader(split), device)
+    print(f"\nShapes: train={X_tr.shape}  val={X_val.shape}  test={X_test.shape}")
+    print(f"Embedding std (train): {X_tr.std(axis=0).mean():.4f}  (> 0.1 = healthy)")
 
-    # Normalize labels (z-score from train set)
-    def norm_labels(y_tr, y_ev):
-        mu, sigma = y_tr.mean(), y_tr.std() + 1e-8
-        return (y_tr - mu) / sigma, (y_ev - mu) / sigma
+    # ── Linear probe ─────────────────────────────────────────────────────────
+    print("\n" + "═" * 55)
+    print("LINEAR PROBE (Ridge, alpha=1.0)")
+    print("═" * 55)
+    lp_a_val, lp_a_test, _, _ = probe_and_knn(
+        X_tr, X_val, X_test, alpha_tr, alpha_val, alpha_test, "alpha")
+    lp_z_val, lp_z_test, _, _ = probe_and_knn(
+        X_tr, X_val, X_test, zeta_tr,  zeta_val,  zeta_test,  "zeta")
 
-    alpha_tr_n, alpha_ev_n = norm_labels(alpha_tr, alpha_ev)
-    zeta_tr_n,  zeta_ev_n  = norm_labels(zeta_tr,  zeta_ev)
+    # ── kNN ───────────────────────────────────────────────────────────────────
+    print("\n" + "═" * 55)
+    print("kNN REGRESSION (k=20, cosine)")
+    print("═" * 55)
+    _, _, knn_a_val, knn_a_test = probe_and_knn(
+        X_tr, X_val, X_test, alpha_tr, alpha_val, alpha_test, "alpha")
+    _, _, knn_z_val, knn_z_test = probe_and_knn(
+        X_tr, X_val, X_test, zeta_tr,  zeta_val,  zeta_test,  "zeta")
 
-    # Normalize embeddings (zero-mean unit-variance per dimension)
-    scaler = StandardScaler().fit(Z_tr)
-    Z_tr_s = scaler.transform(Z_tr)
-    Z_ev_s = scaler.transform(Z_ev)
+    # ── Summary ───────────────────────────────────────────────────────────────
+    print("\n" + "═" * 55)
+    print("SUMMARY  (MSE on z-score normalized targets)")
+    print("═" * 55)
+    print(f"  Linear Probe — alpha:  Val {lp_a_val:.4f}  Test {lp_a_test:.4f}")
+    print(f"  Linear Probe — zeta:   Val {lp_z_val:.4f}  Test {lp_z_test:.4f}")
+    print(f"  kNN          — alpha:  Val {knn_a_val:.4f}  Test {knn_a_test:.4f}")
+    print(f"  kNN          — zeta:   Val {knn_z_val:.4f}  Test {knn_z_test:.4f}")
+    print(f"\n  Lower is better.  Random baseline ≈ 1.0 (normalized)")
 
-    results = {}
-
-    # ── Linear probe (Ridge) ──────────────────────────────────────────────────
-    print("\nlinear probe (Ridge)...")
-    for name, y_tr, y_ev in [
-        ("alpha", alpha_tr_n, alpha_ev_n),
-        ("zeta",  zeta_tr_n,  zeta_ev_n),
-    ]:
-        reg = Ridge(alpha=1.0).fit(Z_tr_s, y_tr)
-        mse = mean_squared_error(y_ev, reg.predict(Z_ev_s))
-        print(f"  linear probe {name}: MSE = {mse:.4f}")
-        results[f"linear_{name}_mse"] = mse
-
-    # ── kNN regression ────────────────────────────────────────────────────────
-    print("\nkNN regression (k=20)...")
-    knn = KNeighborsRegressor(n_neighbors=20, n_jobs=-1)
-    for name, y_tr, y_ev in [
-        ("alpha", alpha_tr_n, alpha_ev_n),
-        ("zeta",  zeta_tr_n,  zeta_ev_n),
-    ]:
-        knn.fit(Z_tr_s, y_tr)
-        mse = mean_squared_error(y_ev, knn.predict(Z_ev_s))
-        print(f"  kNN {name}: MSE = {mse:.4f}")
-        results[f"knn_{name}_mse"] = mse
-
-    print(f"\n── summary ({split}) ──")
-    for k, v in results.items():
-        print(f"  {k}: {v:.4f}")
-
-    return results
+    # ── Save JSON ─────────────────────────────────────────────────────────────
+    payload = {
+        "model":         "vit-jepa-sarvesh",
+        "checkpoint":    args.checkpoint,
+        "train_samples": len(X_tr),
+        "val_samples":   len(X_val),
+        "test_samples":  len(X_test),
+        "embedding_std": float(X_tr.std(axis=0).mean()),
+        "val": {
+            "linear_alpha_mse": lp_a_val,
+            "linear_zeta_mse":  lp_z_val,
+            "knn_alpha_mse":    knn_a_val,
+            "knn_zeta_mse":     knn_z_val,
+        },
+        "test": {
+            "linear_alpha_mse": lp_a_test,
+            "linear_zeta_mse":  lp_z_test,
+            "knn_alpha_mse":    knn_a_test,
+            "knn_zeta_mse":     knn_z_test,
+        },
+    }
+    out_path = args.out or os.path.join(
+        os.path.dirname(args.checkpoint),
+        f"eval_{os.path.splitext(os.path.basename(args.checkpoint))[0]}.json",
+    )
+    with open(out_path, "w") as f:
+        json.dump(payload, f, indent=2)
+    print(f"\nSaved results → {out_path}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config",     type=str, default="config.yaml")
     parser.add_argument("--checkpoint", type=str, required=True)
-    parser.add_argument("--split",      type=str, default="valid", choices=["valid", "test"])
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--out",        type=str, default=None, help="Path to save results JSON")
+    parser.add_argument("--out",        type=str, default=None, help="Override JSON output path")
     args = parser.parse_args()
-
-    with open(args.config) as f:
-        cfg = yaml.safe_load(f)
-
-    results = evaluate(cfg, args.checkpoint, args.split, args.batch_size)
-
-    out_path = args.out or os.path.join(
-        os.path.dirname(args.checkpoint),
-        f"eval_{args.split}_{os.path.splitext(os.path.basename(args.checkpoint))[0]}.json"
-    )
-    payload = {
-        "checkpoint": args.checkpoint,
-        "split":      args.split,
-        "results":    {k: float(v) for k, v in results.items()},
-    }
-    with open(out_path, "w") as f:
-        json.dump(payload, f, indent=2)
-    print(f"\nsaved results → {out_path}")
+    main(args)
