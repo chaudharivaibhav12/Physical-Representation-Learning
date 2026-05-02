@@ -7,7 +7,7 @@
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=40G
-#SBATCH --time=16:00:00
+#SBATCH --time=7:00:00
 #SBATCH --requeue
 #SBATCH --output=/scratch/sb10583/logs/videomae_sarvesh_v1_%j.log
 #SBATCH --mail-type=END,FAIL
