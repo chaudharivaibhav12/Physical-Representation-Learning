@@ -10,18 +10,18 @@ Self-supervised representation learning on physical simulations using a convolut
 Training:
   context (B, 11, 16, 224, 224)
       → ConvNeXt Encoder (5 stages, 3D → 2D)
-          Stage 1: (B, 16, 8, 112, 112)   [2× downsample, 3 res blocks]
-          Stage 2: (B, 32, 4, 56,  56 )   [2× downsample, 3 res blocks]
-          Stage 3: (B, 64, 2, 28,  28 )   [2× downsample, 3 res blocks]
-          Stage 4: (B, 128,1, 14,  14 )   [T collapses → 2D, 9 res blocks]
-          Stage 5: (B, 128,1, 7,   7  )   [2× spatial, 3 res blocks]
-      → context_latent (B, 128, 7, 7)
-      → ConvPredictor (C → 2C → C)
-      → predicted_latent (B, 128, 7, 7)
-                                          ┐
-  target (B, 11, 16, 224, 224)            ├─→ VICReg Loss
-      → same Encoder (no grad)            │    (dense spatial)
-      → target_latent (B, 128, 7, 7)     ┘
+          Stage 0: stem     (B, 11,  16, 224, 224) → (B, 16,  16, 224, 224)  [3 res blocks, no downsample]
+          Stage 1: down3d   (B, 16,  16, 224, 224) → (B, 32,   8, 112, 112)  [2× downsample, 3 res blocks]
+          Stage 2: down3d   (B, 32,   8, 112, 112) → (B, 64,   4,  56,  56)  [2× downsample, 3 res blocks]
+          Stage 3: down3d   (B, 64,   4,  56,  56) → (B, 128,  2,  28,  28)  [2× downsample, 9 res blocks]
+          Stage 4: down3d   (B, 128,  2,  28,  28) → (B, 128,  1,  14,  14)  [T collapses → 2D, 3 res blocks]
+      → context_latent (B, 128, 14, 14)
+      → ConvPredictor: Conv2d(128→256) → ResidualBlock(256) → Conv2d(256→128)
+      → predicted_latent (B, 128, 14, 14)
+                                           ┐
+  target (B, 11, 16, 224, 224)             ├─→ VICReg Loss
+      → same Encoder (no grad)             │    (dense spatial, 14×14=196 vectors/sample)
+      → target_latent (B, 128, 14, 14)    ┘
 
 Evaluation (predictor discarded):
   clip → Encoder → global avg pool → (B, 128) → Linear Probe / kNN
@@ -38,10 +38,10 @@ Evaluation (predictor discarded):
 |---|---|
 | Channel dims | [16, 32, 64, 128, 128] |
 | Residual blocks per stage | [3, 3, 3, 9, 3] |
-| Convolutions (stages 1–3) | 3D (temporal + spatial) |
-| Convolutions (stages 4–5) | 2D (temporal dim collapsed) |
+| Convolutions (stages 0–3) | 3D (temporal + spatial) |
+| Convolutions (stage 4) | 2D (temporal dim collapsed after squeeze) |
 | Downsampling | 2× per stage (stride conv) |
-| Output spatial | 7×7 |
+| Output spatial | 14×14 |
 | Output channels | 128 |
 | Normalization | LayerNorm per block |
 
@@ -49,19 +49,20 @@ Evaluation (predictor discarded):
 Lightweight convolutional head that predicts the target latent from the context latent.
 
 ```
-(B, 128, 7, 7)
-  → Conv2d(128 → 256) → GELU
-  → Conv2d(256 → 128)
-→ predicted_latent (B, 128, 7, 7)
+(B, 128, 14, 14)
+  → Conv2d(128 → 256, k=2, pad=1)
+  → ResidualBlock(256)              [depthwise 7×7 conv → LayerNorm → 4× MLP → LayerScale]
+  → Conv2d(256 → 128, k=2)
+→ predicted_latent (B, 128, 14, 14)
 ```
 
 ### 3. VICReg Loss
-Applied between predicted and target dense spatial embeddings (B, 128, 7, 7), treated as a bag of 49 vectors per sample.
+Applied between predicted and target dense spatial embeddings (B, 128, 14, 14), treated as a bag of 196 vectors per sample.
 
 | Term | Weight | Purpose |
 |---|---|---|
 | Invariance (sim) | 2.0 | MSE between predicted and target latents |
-| Variance (std) | 40.0 | Keep per-dim std ≥ 1 — prevent collapse |
+| Variance (std) | 20.0 | Keep per-dim std ≥ 1 — prevent collapse |
 | Covariance (cov) | 2.0 | Decorrelate embedding dimensions |
 | Chunks per batch | 5 | Shuffle-and-chunk for stable covariance estimate |
 
@@ -109,23 +110,23 @@ Per-sample, per-channel z-score normalization across T×H×W.
 
 | Hyperparameter | Value |
 |---|---|
-| Epochs | 30 |
+| Epochs | 50 |
 | Per-device batch size | 8 |
-| Target global batch size | 256 (via gradient accumulation) |
+| Target global batch size | 128 (via gradient accumulation) |
 | Learning rate | 1e-3 |
-| LR schedule | Cosine annealing, 2-epoch warmup, min=1e-6 |
+| LR schedule | Cosine annealing, 1-epoch warmup, min=1e-6 |
 | Weight decay | 0.05 |
 | Gradient clip | 1.0 |
 | Optimizer | AdamW, betas=(0.9, 0.95) |
 | Mixed precision | bfloat16 |
-| VICReg sim / std / cov | 2 / 40 / 2 |
+| VICReg sim / std / cov | 2 / 20 / 2 |
 | VICReg chunks per batch | 5 |
 
 ---
 
 ## Training Objective
 
-Given 16 context frames, the encoder produces a spatial latent that the predictor maps to match the encoder's latent of the next 16 target frames. VICReg is applied on the dense spatial embeddings (49 vectors per sample). The encoder learns to produce representations that are:
+Given 16 context frames, the encoder produces a spatial latent that the predictor maps to match the encoder's latent of the next 16 target frames. VICReg is applied on the dense spatial embeddings (196 vectors per sample from the 14×14 output). The encoder learns to produce representations that are:
 - **Predictive** — context latent can be transformed to match the target latent
 - **Non-collapsed** — each embedding dimension has variance ≥ 1
 - **Decorrelated** — no redundant dimensions
@@ -165,9 +166,11 @@ dataset:
 | `model.py` | ConvEncoder, ConvPredictor, ResidualBlock, LayerNorm |
 | `loss.py` | VICReg with shuffle-and-chunk |
 | `scheduler.py` | Cosine LR with linear warmup |
-| `train.py` | Training loop (DDP + AMP + gradient accumulation) |
+| `train.py` | Training loop (DDP + AMP + gradient accumulation, W&B logging) |
+| `eval_probe.py` | Linear probe + kNN regression on frozen encoder embeddings |
+| `collapse_check.py` | Representation collapse diagnostics (effective rank, channel stats, kNN identity) |
 | `config.yaml` | Training config (mirrors train_activematter_small.yaml) |
-| `_sanity.py` | Shape and gradient check — run once after setup |
+| `run_slurm_job.sbatch` | SLURM job script for NYU HPC |
 
 ---
 
@@ -175,18 +178,20 @@ dataset:
 
 ### 1. Verify the model builds
 
-```bash
-cd jepa_baseline
-python _sanity.py
+```python
+from model import build_jepa, count_params
+from omegaconf import OmegaConf
+
+cfg = OmegaConf.load("config.yaml")
+encoder, predictor = build_jepa(cfg)
+print(f"encoder:   {count_params(encoder):,}")
+print(f"predictor: {count_params(predictor):,}")
 ```
 
 Expected output:
 ```
-[PARAMS] encoder:   2,468,720
-[PARAMS] predictor: 801,664
-[PARAMS] total:     3,270,384
-...
-[GRAD ] backward OK
+encoder:   2,468,720
+predictor: 801,664
 ```
 
 ### 2. Edit the config
@@ -247,12 +252,37 @@ Each checkpoint contains: `encoder`, `predictor`, `optimizer`, `scheduler`, `epo
 
 The frozen encoder (128-dim global-average-pooled output) is evaluated by predicting the physical parameters α and ζ using:
 
-1. **Linear probe** — single `nn.Linear(128, 1)` trained with MSE loss
-2. **kNN regression** — k=20 nearest neighbors with cosine distance
+1. **Linear probe** — single `nn.Linear(128, 2)` trained with MSE loss, predicting α and ζ simultaneously
+2. **kNN regression** — sweeps k∈{1,3,5,10,20}, selects best k by validation MSE, uses Euclidean distance with inverse-distance weighting
 
-Both targets are z-score normalized. MSE is reported on the validation and test sets.
+Both targets are z-score normalized using fixed stats (α: mean=−3.0, std=1.414; ζ: mean=9.0, std=5.164). Features are aggregated per trajectory (mean-pooled across windows) before fitting. MSE is reported in both normalized and original physical units on val and test sets.
+
+```bash
+python eval_probe.py \
+    --checkpoint /path/to/best.pt \
+    --cache-dir /path/to/active_matter/cache \
+    --output-json results.json
+```
 
 ---
+
+## Collapse Diagnostics
+
+`collapse_check.py` quantifies how well the encoder uses its feature space. Run it on any checkpoint:
+
+```bash
+python collapse_check.py \
+    --checkpoint /path/to/epoch_N.pt \
+    --cache-dir /path/to/active_matter/cache \
+    --output-json collapse_epochN.json
+```
+
+Reports:
+- **Effective rank** — entropy of the singular value spectrum; healthy encoder ≈ close to 128
+- **Participation ratio** — how many dimensions carry meaningful energy
+- **Dead channel fraction** — channels with std < 1e-4 (should be near 0)
+- **Near-unit channel fraction** — channels with std ∈ [0.9, 1.1]; high values indicate the encoder is only barely satisfying the VICReg std hinge (partial collapse signal)
+- **kNN identity rate** — whether distinct trajectories map to distinct features
 
 ## Memory & Throughput Notes
 
