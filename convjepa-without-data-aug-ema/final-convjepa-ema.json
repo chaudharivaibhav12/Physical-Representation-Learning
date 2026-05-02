@@ -7,45 +7,45 @@
   "feature_dim": 128,
   "linear_probe": {
     "train_info": {
-      "best_val_mse_normalized": 0.08194661885499954
+      "best_val_mse_normalized": 0.07969775795936584
     },
     "val": {
-      "mse_normalized_alpha": 0.011708855628967285,
-      "mse_normalized_zeta": 0.1521843820810318,
-      "mse_normalized_avg": 0.08194661885499954,
-      "mse_alpha": 0.023417264223098755,
-      "mse_zeta": 4.058284759521484,
-      "mse_avg": 2.040850877761841
+      "mse_normalized_alpha": 0.011913982219994068,
+      "mse_normalized_zeta": 0.1474815458059311,
+      "mse_normalized_avg": 0.07969775795936584,
+      "mse_alpha": 0.02382752113044262,
+      "mse_zeta": 3.932875633239746,
+      "mse_avg": 1.9783514738082886
     },
     "test": {
-      "mse_normalized_alpha": 0.012098918668925762,
-      "mse_normalized_zeta": 0.19455374777317047,
-      "mse_normalized_avg": 0.10332633554935455,
-      "mse_alpha": 0.024197367951273918,
-      "mse_zeta": 5.188144207000732,
-      "mse_avg": 2.606170892715454
+      "mse_normalized_alpha": 0.011396666057407856,
+      "mse_normalized_zeta": 0.1771964430809021,
+      "mse_normalized_avg": 0.09429655969142914,
+      "mse_alpha": 0.022792883217334747,
+      "mse_zeta": 4.725279808044434,
+      "mse_avg": 2.3740365505218506
     }
   },
   "knn": {
     "train_info": {
-      "best_k": 10,
-      "best_val_mse_normalized": 0.12221602742315807
+      "best_k": 5,
+      "best_val_mse_normalized": 0.11974452520611435
     },
     "val": {
-      "mse_normalized_alpha": 0.0008631511373010554,
-      "mse_normalized_zeta": 0.24356890370901507,
-      "mse_normalized_avg": 0.12221602742315807,
-      "mse_alpha": 0.0017262689822610672,
-      "mse_zeta": 6.495226346479952,
-      "mse_avg": 3.2484763077311065
+      "mse_normalized_alpha": 8.73088241455547e-33,
+      "mse_normalized_zeta": 0.23948905041222876,
+      "mse_normalized_avg": 0.11974452520611435,
+      "mse_alpha": 1.9141249903454342e-15,
+      "mse_zeta": 6.386429383893727,
+      "mse_avg": 3.193214691946864
     },
     "test": {
-      "mse_normalized_alpha": 0.014468357778353634,
-      "mse_normalized_zeta": 0.22803730869516,
-      "mse_normalized_avg": 0.12125283323675681,
-      "mse_alpha": 0.02893616290588787,
-      "mse_zeta": 6.0810468660376875,
-      "mse_avg": 3.054991514471788
+      "mse_normalized_alpha": 0.010101302181204823,
+      "mse_normalized_zeta": 0.18292015440937226,
+      "mse_normalized_avg": 0.09651072829528855,
+      "mse_alpha": 0.020202219226434337,
+      "mse_zeta": 4.877912477587706,
+      "mse_avg": 2.4490573484070697
     }
   }
 }
