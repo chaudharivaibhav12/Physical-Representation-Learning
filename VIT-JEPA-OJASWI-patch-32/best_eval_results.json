@@ -1,0 +1,34 @@
+{
+  "checkpoint": "/scratch/ok2287/checkpoints/vit_jepa/best.pt",
+  "epoch": 32,
+  "collapse": {
+    "avg_std": 0.3860078752040863,
+    "min_std": 0.27490147948265076,
+    "dead_dims": 0,
+    "status": "\u2713 HEALTHY"
+  },
+  "linear_probe": {
+    "alpha": {
+      "train_mse": 0.8099293112754822,
+      "val_mse": 0.6618918776512146,
+      "test_mse": 0.6044894456863403
+    },
+    "zeta": {
+      "train_mse": 0.8868135213851929,
+      "val_mse": 0.7435055375099182,
+      "test_mse": 0.8798984289169312
+    }
+  },
+  "knn": {
+    "alpha": {
+      "train_mse": 0.8021856546401978,
+      "val_mse": 0.7411313652992249,
+      "test_mse": 0.7208697199821472
+    },
+    "zeta": {
+      "train_mse": 0.8630092740058899,
+      "val_mse": 0.8360621929168701,
+      "test_mse": 0.9858121275901794
+    }
+  }
+}
