@@ -1,0 +1,32 @@
+{
+  "checkpoint": "/scratch/ok2287/checkpoints/ijepa/latest.pt",
+  "collapse": {
+    "avg_std": 0.17852599918842316,
+    "dead_dims": 0,
+    "status": "\u2713 HEALTHY"
+  },
+  "linear_probe": {
+    "alpha": {
+      "train_mse": 0.6896984577178955,
+      "val_mse": 0.439353883266449,
+      "test_mse": 0.4658984839916229
+    },
+    "zeta": {
+      "train_mse": 0.5461334586143494,
+      "val_mse": 0.4438270628452301,
+      "test_mse": 0.4955781102180481
+    }
+  },
+  "knn": {
+    "alpha": {
+      "train_mse": 0.4977116584777832,
+      "val_mse": 0.5026623606681824,
+      "test_mse": 0.4724043011665344
+    },
+    "zeta": {
+      "train_mse": 0.4064548909664154,
+      "val_mse": 0.4590335190296173,
+      "test_mse": 0.6419888734817505
+    }
+  }
+}

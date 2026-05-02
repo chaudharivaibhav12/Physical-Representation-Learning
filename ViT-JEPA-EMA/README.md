@@ -1,59 +1,89 @@
-# I-JEPA for Active Matter Physical Representations
+## **Vision Transformer — I-JEPA on Active Matter**
 
-This repository implements an **Image-based Joint-Embedding Predictive Architecture (I-JEPA)** adapted for spatiotemporal physical simulations. Unlike contrastive methods, this architecture uses an **Exponential Moving Average (EMA)** target encoder and multi-block spatial masking to learn highly robust physical representations without requiring explicit collapse-prevention losses (like VICReg) or negative pairs.
-
-## 🔬 Architecture Details
-The architecture closely follows the original I-JEPA design but is extended for 11-channel active matter data (e.g., concentration, velocity, D-tensor, E-tensor).
-
-* **Context Encoder:** A ViT-Small (12 layers, 6 heads, dim 384) that processes *only the visible* spatiotemporal patches.
-* **Target Encoder:** An EMA copy of the Context Encoder. Momentum scales smoothly from 0.996 to 1.0 during training.
-* **Predictor:** A narrow ViT bottleneck (6 layers, dim 192) that predicts the target patch representations using context tokens and positional mask tokens.
-* **Masking Strategy:** Multi-block spatial masking (4 target blocks, 1 context block) extended into "temporal tubes" (the same spatial mask applied across all frames).
-* **Data Configuration:** Subsampled to 4 frames per clip with a 32x32 spatial patch size, drastically reducing the token sequence and attention bottleneck.
+Self-supervised representation learning on physical simulations using the **Joint-Embedding Predictive Architecture (I-JEPA)**. The model learns by predicting the representations of masked "target" spatio-temporal blocks from visible "context" blocks, using a target encoder updated via **Exponential Moving Average (EMA)**.
 
 ---
 
-## 📁 Repository Structure
-* **`model.py`**: Core architecture including the 11-channel Spatiotemporal Patch Embedding, Context/Target ViTs, and the Predictor bottleneck.
-* **`masking.py`**: Implements the multi-block spatial masking strategy defined in the I-JEPA paper.
-* **`dataset.py`**: HDF5 data loader handling active matter channel concatenation, 224x224 random spatial crops, and independent channel z-score normalization.
-* **`train.py`**: Main pretraining loop featuring cosine learning rate scheduling, EMA momentum scheduling, and atomic checkpointing.
-* **`evaluate_ddp.py`**: Evaluation suite (Linear Probe and kNN Regression) with robust Slurm preemption handling via chunk-based embedding caching.
-* **`*.sbatch`**: Slurm scripts tailored for single and multi-GPU (DDP) execution on HPC environments.
+### **Architecture Overview**
+
+**Training Pipeline:**
+* **Target Path**: A full 11-channel clip is passed through the **Target Encoder** (EMA of context encoder) to generate representations for all patches. Target patches are extracted using sampled indices.
+* **Context Path**: The same clip is masked; only visible (unmasked) patches are passed through the **Context Encoder**.
+* **Prediction**: A narrow **Predictor ViT** takes the context embeddings and learnable **Mask Tokens** (augmented with positional embeddings) to predict the missing target representations.
+* **Loss**: Average **L2 (MSE) loss** between the predicted patch embeddings and the target encoder's output.
+
+**Evaluation (Predictor discarded):**
+* clip -> **Target Encoder** -> mean pool -> `(B, 384)` -> **Linear Probe / kNN**.
+* *Note: The Target Encoder is used for evaluation as it produces richer representations by seeing the full input.*
 
 ---
 
-## 🚀 Getting Started
+### **Components**
 
-### 1. Installation
-```bash
-conda activate physrep
-pip install torch torchvision wandb h5py scikit-learn
-```
+#### **1. PatchEmbed (Spatio-temporal)**
+Treats each frame as an independent 11-channel image before applying 2D projection and adding temporal/spatial embeddings.
+| Property | Value |
+| :--- | :--- |
+| **Input channels** | 11 |
+| **Patch size** | 16x16 |
+| **Spatial Positional** | Learned `1 x N_patches x D` (shared across frames) |
+| **Temporal Positional** | Learned `1 x T x D` (one per frame) |
 
-### 2. Pretraining
-Training leverages atomic checkpointing to survive HPC preemption. 
-```bash
-# Single-GPU Training
-sbatch train.sbatch
+#### **2. Multi-Block Mask Sampler**
+Implements the multi-block masking strategy to ensure a non-trivial prediction task.
+| Property | Value |
+| :--- | :--- |
+| **Target Blocks** | 4 blocks, scale (0.15, 0.2), aspect ratio (0.75, 1.5) |
+| **Context Blocks** | 1 block, scale (0.85, 1.0) |
+| **Strategy** | Temporal tube masking (same spatial mask across all frames) |
 
-# Multi-GPU (DDP) Training
-sbatch train_2_gpu.sbatch
-```
-
-### 3. Evaluation
-Evaluates the *frozen Target Encoder* on downstream parameter prediction (alpha and zeta). The `evaluate_ddp.py` script automatically resumes from cached embeddings if preempted.
-```bash
-sbatch eval.sbatch
-
-# or manually:
-python evaluate_ddp.py --checkpoint /scratch/ok2287/checkpoints/ijepa/latest.pt --save
-```
+#### **3. Encoders & Predictor**
+| Property | Context/Target Encoder (ViT-Small) | Predictor (Narrow ViT) |
+| :--- | :--- | :--- |
+| **Embed dim** | 384 | 192 |
+| **Depth** | 12 | 6 |
+| **Heads** | 6 | 6 |
+| **MLP Ratio** | 4.0 | 4.0 |
 
 ---
 
-## 🛡 HPC / Slurm Resiliency
-This codebase is heavily optimized for interruptible GPU clusters (e.g., Google Cloud/Slurm):
-* **Atomic Checkpointing:** Writes to temporary files before renaming, eliminating corrupted `.pt` files.
-* **Signal Handling:** Catches `SIGUSR1`/`SIGTERM` to gracefully pause and requeue.
-* **Embedding Caching:** Evaluation extracts embeddings in chunks of 50 batches. If preempted, it skips completed chunks upon resuming.
+### **Dataset: active_matter**
+
+Physical simulations of active matter dynamics stored in HDF5 format.
+| Property | Value |
+| :--- | :--- |
+| **Source** | HuggingFace `polymathic-ai/active_matter` |
+| **Input Channels** | 11 (Concentration, Velocity, D tensor, E tensor) |
+| **Resolution** | 224x224 (Cropped from 256x256) |
+| **Temporal Length** | 32 frames total (16 context + 16 target) |
+| **Parameters** | alpha (Active dipole strength), zeta (Steric alignment) |
+
+---
+
+### **Evaluation Results**
+
+The frozen **Target Encoder** is evaluated on predicting alpha and zeta using MSE on z-score normalized targets.
+| Method | Target | Train MSE | Val MSE | Test MSE |
+| :--- | :--- | :--- | :--- | :--- |
+| **Linear Probe** | alpha | 0.6897 | 0.4394 | 0.4659 |
+| **Linear Probe** | zeta | 0.5461 | 0.4438 | 0.4956 |
+| **kNN (k=20)** | alpha | 0.4977 | 0.5027 | 0.4724 |
+| **kNN (k=20)** | zeta | 0.4065 | 0.4590 | 0.6420 |
+
+> **Collapse Check**: The model is reported as **HEALTHY** with an `avg_std` of 0.1785 and **0 dead dimensions**.
+
+---
+
+### **Running**
+
+**HPC Execution (Slurm):**
+The pipeline is designed to be preemption-safe on NYU HPC, caching embeddings every 50 batches to resume progress.
+```bash
+sbatch eval_ddp.sbatch
+
+ 
+
+**Manual Evaluation:**
+ 
+```bash
+python evaluate_ddp.py --checkpoint /path/to/latest.pt --save
