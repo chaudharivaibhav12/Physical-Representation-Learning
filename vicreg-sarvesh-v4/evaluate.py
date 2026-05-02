@@ -1,24 +1,26 @@
 """
-Evaluation: Linear Probe + kNN Regression
-==========================================
-Evaluates frozen VICReg encoder by predicting alpha and zeta using:
-  1. Single linear layer  (required by project spec)
-  2. kNN regression       (required by project spec)
+VICReg-V4 Evaluation — Linear Probe + kNN Regression
+=====================================================
+Loads the frozen VICReg encoder from a checkpoint and evaluates
+representation quality by predicting alpha and zeta using:
+  1. Linear probe  — Ridge regression (sklearn)
+  2. kNN           — k-Nearest Neighbours regression (k=20, cosine)
 
-Both reported with MSE on z-score normalized targets.
+Targets are z-score normalized (train statistics).  MSE reported for both
+val and test splits in a single run.
 
 Usage:
-  python evaluate.py --checkpoint /scratch/sb10583/checkpoints/vicreg/best.pt
+  python evaluate.py --checkpoint /scratch/sb10583/checkpoints/vicreg-v4/best.pt
 """
 
-import os
-import json
 import argparse
+import json
+import os
+
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 from torch.utils.data import DataLoader
+from sklearn.linear_model import Ridge
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error
@@ -30,7 +32,7 @@ from dataset import ActiveMatterEval
 CONFIG = {
     "data_dir":    "/scratch/sb10583/data/data",
     "crop_size":   224,
-    "batch_size":  8,
+    "batch_size":  32,
 
     # Must match training config
     "in_channels": 11,
@@ -42,31 +44,23 @@ CONFIG = {
     "num_frames":  16,
     "proj_hidden": 2048,
     "proj_out":    2048,
-
-    # Eval
-    "k":            20,
-    "probe_epochs": 100,
-    "probe_lr":     1e-3,
 }
 
 
-# ─────────────────────────────────────────────
-# Extract Embeddings
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# Embedding extraction
+# ─────────────────────────────────────────────────────────────────────────────
 
 @torch.no_grad()
 def extract_embeddings(encoder, loader, device):
-    """Run all samples through the frozen encoder. Returns (N, D), alphas, zetas."""
     encoder.eval()
     embeddings, alphas, zetas = [], [], []
-
     for batch in loader:
-        x  = batch["x"].to(device)
-        z  = encoder.forward_pooled(x)       # (B, embed_dim)
+        x = batch["x"].to(device)
+        z = encoder.forward_pooled(x)
         embeddings.append(z.cpu().numpy())
         alphas.append(batch["alpha"].numpy())
         zetas.append(batch["zeta"].numpy())
-
     return (
         np.concatenate(embeddings, axis=0),
         np.concatenate(alphas,     axis=0),
@@ -74,99 +68,47 @@ def extract_embeddings(encoder, loader, device):
     )
 
 
-# ─────────────────────────────────────────────
-# Linear Probe
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# Probe + kNN on one target variable
+# ─────────────────────────────────────────────────────────────────────────────
 
-class LinearProbe(nn.Module):
-    def __init__(self, embed_dim: int):
-        super().__init__()
-        self.linear = nn.Linear(embed_dim, 1)
+def probe_and_knn(X_tr, X_val, X_test, y_tr, y_val, y_test, label, k=20):
+    mu, sigma  = y_tr.mean(), y_tr.std() + 1e-8
+    y_tr_n     = (y_tr   - mu) / sigma
+    y_val_n    = (y_val  - mu) / sigma
+    y_test_n   = (y_test - mu) / sigma
 
-    def forward(self, x):
-        return self.linear(x).squeeze(-1)
+    scaler   = StandardScaler()
+    X_tr_s   = scaler.fit_transform(X_tr)
+    X_val_s  = scaler.transform(X_val)
+    X_test_s = scaler.transform(X_test)
 
-
-def train_linear_probe(
-    train_emb, train_targets,
-    val_emb,   val_targets,
-    embed_dim, epochs=100, lr=1e-3, label="alpha",
-) -> dict:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    X_train = torch.tensor(train_emb,     dtype=torch.float32, device=device)
-    y_train = torch.tensor(train_targets, dtype=torch.float32, device=device)
-    X_val   = torch.tensor(val_emb,       dtype=torch.float32, device=device)
-    y_val   = torch.tensor(val_targets,   dtype=torch.float32, device=device)
-
-    # Z-score normalize targets
-    mean = y_train.mean()
-    std  = y_train.std() + 1e-6
-    y_train_n = (y_train - mean) / std
-    y_val_n   = (y_val   - mean) / std
-
-    probe     = LinearProbe(embed_dim).to(device)
-    optimizer = torch.optim.Adam(probe.parameters(), lr=lr)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
-
-    best_val_mse = float("inf")
-    for epoch in range(epochs):
-        probe.train()
-        pred = probe(X_train)
-        loss = F.mse_loss(pred, y_train_n)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        scheduler.step()
-
-        if (epoch + 1) % 20 == 0:
-            probe.eval()
-            with torch.no_grad():
-                val_mse = F.mse_loss(probe(X_val), y_val_n).item()
-            best_val_mse = min(best_val_mse, val_mse)
-
-    probe.eval()
-    with torch.no_grad():
-        train_mse = F.mse_loss(probe(X_train), y_train_n).item()
-        val_mse   = F.mse_loss(probe(X_val),   y_val_n).item()
-
-    print(f"  Linear Probe [{label:5s}] → Train MSE: {train_mse:.4f} | Val MSE: {val_mse:.4f}")
-    return {"train_mse": train_mse, "val_mse": val_mse}
-
-
-# ─────────────────────────────────────────────
-# kNN Regression
-# ─────────────────────────────────────────────
-
-def evaluate_knn(train_emb, train_targets, val_emb, val_targets, k=20, label="alpha") -> dict:
-    mean = train_targets.mean()
-    std  = train_targets.std() + 1e-6
-    y_train_n = (train_targets - mean) / std
-    y_val_n   = (val_targets   - mean) / std
-
-    scaler  = StandardScaler()
-    X_train = scaler.fit_transform(train_emb)
-    X_val   = scaler.transform(val_emb)
+    ridge = Ridge(alpha=1.0)
+    ridge.fit(X_tr_s, y_tr_n)
+    lp_val  = mean_squared_error(y_val_n,  ridge.predict(X_val_s))
+    lp_test = mean_squared_error(y_test_n, ridge.predict(X_test_s))
 
     knn = KNeighborsRegressor(n_neighbors=k, metric="cosine", n_jobs=-1)
-    knn.fit(X_train, y_train_n)
+    knn.fit(X_tr_s, y_tr_n)
+    knn_val  = mean_squared_error(y_val_n,  knn.predict(X_val_s))
+    knn_test = mean_squared_error(y_test_n, knn.predict(X_test_s))
 
-    train_mse = mean_squared_error(y_train_n, knn.predict(X_train))
-    val_mse   = mean_squared_error(y_val_n,   knn.predict(X_val))
-
-    print(f"  kNN (k={k:2d}) [{label:5s}]    → Train MSE: {train_mse:.4f} | Val MSE: {val_mse:.4f}")
-    return {"train_mse": train_mse, "val_mse": val_mse}
+    print(f"  Linear [{label:5s}] → Val: {lp_val:.4f}  Test: {lp_test:.4f}")
+    print(f"  kNN    [{label:5s}] → Val: {knn_val:.4f}  Test: {knn_test:.4f}")
+    return lp_val, lp_test, knn_val, knn_test
 
 
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
 # Main
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
 
-def evaluate(args, cfg):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def main(args, cfg):
+    device      = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    use_cuda    = device.type == "cuda"
+    num_workers = 4 if use_cuda else 0
     print(f"Device: {device}\n")
 
-    # ── Load model ────────────────────────────────────────────────────
+    # ── Load model ────────────────────────────────────────────────────────────
     model = VICReg(
         in_channels = cfg["in_channels"],
         embed_dim   = cfg["embed_dim"],
@@ -180,110 +122,94 @@ def evaluate(args, cfg):
         proj_out    = cfg["proj_out"],
     ).to(device)
 
-    print(f"[LOAD] Loading checkpoint: {args.checkpoint}")
     ckpt = torch.load(args.checkpoint, map_location=device)
     model.encoder.load_state_dict(ckpt["encoder"])
     model.eval()
-
     for param in model.encoder.parameters():
         param.requires_grad = False
+    print(f"Loaded checkpoint: {args.checkpoint}  [encoder frozen]")
 
-    print("[LOAD] Encoder frozen.\n")
+    # ── Datasets ──────────────────────────────────────────────────────────────
+    # stride=1 → 8750/1200/1300 samples matching the project spec
+    def make_loader(split):
+        ds = ActiveMatterEval(cfg["data_dir"], split=split, crop_size=cfg["crop_size"], stride=1)
+        return DataLoader(ds, batch_size=cfg["batch_size"], shuffle=False,
+                          num_workers=num_workers, pin_memory=use_cuda)
 
-    # ── Datasets ──────────────────────────────────────────────────────
-    # stride=1 gives 8750/1200/1300 samples matching the project spec
-    train_ds = ActiveMatterEval(cfg["data_dir"], split="train",  crop_size=cfg["crop_size"], stride=1)
-    val_ds   = ActiveMatterEval(cfg["data_dir"], split="valid",  crop_size=cfg["crop_size"], stride=1)
-    test_ds  = ActiveMatterEval(cfg["data_dir"], split="test",   crop_size=cfg["crop_size"], stride=1)
-
-    train_loader = DataLoader(train_ds, batch_size=cfg["batch_size"], shuffle=False, num_workers=4)
-    val_loader   = DataLoader(val_ds,   batch_size=cfg["batch_size"], shuffle=False, num_workers=2)
-    test_loader  = DataLoader(test_ds,  batch_size=cfg["batch_size"], shuffle=False, num_workers=2)
-
-    # ── Extract embeddings ────────────────────────────────────────────
+    # ── Extract embeddings ────────────────────────────────────────────────────
+    print("\n" + "═" * 55)
+    print("EXTRACTING EMBEDDINGS")
+    print("═" * 55)
     print("Extracting train embeddings...")
-    train_emb, train_alpha, train_zeta = extract_embeddings(model.encoder, train_loader, device)
-
+    X_tr, alpha_tr, zeta_tr = extract_embeddings(model.encoder, make_loader("train"), device)
     print("Extracting val embeddings...")
-    val_emb, val_alpha, val_zeta = extract_embeddings(model.encoder, val_loader, device)
-
+    X_val, alpha_val, zeta_val = extract_embeddings(model.encoder, make_loader("valid"), device)
     print("Extracting test embeddings...")
-    test_emb, test_alpha, test_zeta = extract_embeddings(model.encoder, test_loader, device)
+    X_test, alpha_test, zeta_test = extract_embeddings(model.encoder, make_loader("test"), device)
 
-    print(f"\nShapes: train={train_emb.shape}  val={val_emb.shape}  test={test_emb.shape}")
-    print(f"Embedding std (train): {train_emb.std(axis=0).mean():.4f}  (> 0.1 = healthy)\n")
+    print(f"\nShapes: train={X_tr.shape}  val={X_val.shape}  test={X_test.shape}")
+    print(f"Embedding std (train): {X_tr.std(axis=0).mean():.4f}  (> 0.1 = healthy)")
 
-    # ── Linear Probe ──────────────────────────────────────────────────
-    print("=" * 55)
-    print("LINEAR PROBE")
-    print("=" * 55)
-    lp_alpha = train_linear_probe(
-        train_emb, train_alpha, val_emb, val_alpha,
-        cfg["embed_dim"], epochs=cfg["probe_epochs"], label="alpha",
-    )
-    lp_zeta = train_linear_probe(
-        train_emb, train_zeta, val_emb, val_zeta,
-        cfg["embed_dim"], epochs=cfg["probe_epochs"], label="zeta",
-    )
+    # ── Linear probe ─────────────────────────────────────────────────────────
+    print("\n" + "═" * 55)
+    print("LINEAR PROBE (Ridge, alpha=1.0)")
+    print("═" * 55)
+    lp_a_val, lp_a_test, _, _ = probe_and_knn(
+        X_tr, X_val, X_test, alpha_tr, alpha_val, alpha_test, "alpha")
+    lp_z_val, lp_z_test, _, _ = probe_and_knn(
+        X_tr, X_val, X_test, zeta_tr,  zeta_val,  zeta_test,  "zeta")
 
-    # ── kNN ───────────────────────────────────────────────────────────
-    print("\n" + "=" * 55)
-    print("kNN REGRESSION")
-    print("=" * 55)
-    knn_alpha = evaluate_knn(train_emb, train_alpha, val_emb, val_alpha, k=cfg["k"], label="alpha")
-    knn_zeta  = evaluate_knn(train_emb, train_zeta,  val_emb, val_zeta,  k=cfg["k"], label="zeta")
+    # ── kNN ───────────────────────────────────────────────────────────────────
+    print("\n" + "═" * 55)
+    print("kNN REGRESSION (k=20, cosine)")
+    print("═" * 55)
+    _, _, knn_a_val, knn_a_test = probe_and_knn(
+        X_tr, X_val, X_test, alpha_tr, alpha_val, alpha_test, "alpha")
+    _, _, knn_z_val, knn_z_test = probe_and_knn(
+        X_tr, X_val, X_test, zeta_tr,  zeta_val,  zeta_test,  "zeta")
 
-    # ── Test set (final eval only) ────────────────────────────────────
-    test_results = {}
-    if args.test:
-        print("\n" + "=" * 55)
-        print("TEST SET (final evaluation)")
-        print("=" * 55)
-        test_knn_alpha = evaluate_knn(train_emb, train_alpha, test_emb, test_alpha, k=cfg["k"], label="alpha")
-        test_knn_zeta  = evaluate_knn(train_emb, train_zeta,  test_emb, test_zeta,  k=cfg["k"], label="zeta")
-        test_lp_alpha  = train_linear_probe(train_emb, train_alpha, test_emb, test_alpha, cfg["embed_dim"], label="alpha")
-        test_lp_zeta   = train_linear_probe(train_emb, train_zeta,  test_emb, test_zeta,  cfg["embed_dim"], label="zeta")
-        test_results = {
-            "linear_alpha_mse": test_lp_alpha["val_mse"],
-            "linear_zeta_mse":  test_lp_zeta["val_mse"],
-            "knn_alpha_mse":    test_knn_alpha["val_mse"],
-            "knn_zeta_mse":     test_knn_zeta["val_mse"],
-        }
-
-    # ── Summary ───────────────────────────────────────────────────────
-    print("\n" + "=" * 55)
-    print("SUMMARY  (Validation MSE, z-score normalized targets)")
-    print("=" * 55)
-    print(f"  Linear Probe — alpha: {lp_alpha['val_mse']:.4f}")
-    print(f"  Linear Probe — zeta:  {lp_zeta['val_mse']:.4f}")
-    print(f"  kNN          — alpha: {knn_alpha['val_mse']:.4f}")
-    print(f"  kNN          — zeta:  {knn_zeta['val_mse']:.4f}")
+    # ── Summary ───────────────────────────────────────────────────────────────
+    print("\n" + "═" * 55)
+    print("SUMMARY  (MSE on z-score normalized targets)")
+    print("═" * 55)
+    print(f"  Linear Probe — alpha:  Val {lp_a_val:.4f}  Test {lp_a_test:.4f}")
+    print(f"  Linear Probe — zeta:   Val {lp_z_val:.4f}  Test {lp_z_test:.4f}")
+    print(f"  kNN          — alpha:  Val {knn_a_val:.4f}  Test {knn_a_test:.4f}")
+    print(f"  kNN          — zeta:   Val {knn_z_val:.4f}  Test {knn_z_test:.4f}")
     print(f"\n  Lower is better.  Random baseline ≈ 1.0 (normalized)")
 
+    # ── Save JSON ─────────────────────────────────────────────────────────────
     payload = {
-        "checkpoint": args.checkpoint,
+        "model":         "vicreg-v4",
+        "checkpoint":    args.checkpoint,
+        "train_samples": len(X_tr),
+        "val_samples":   len(X_val),
+        "test_samples":  len(X_test),
+        "embedding_std": float(X_tr.std(axis=0).mean()),
         "val": {
-            "linear_alpha_mse": lp_alpha["val_mse"],
-            "linear_zeta_mse":  lp_zeta["val_mse"],
-            "knn_alpha_mse":    knn_alpha["val_mse"],
-            "knn_zeta_mse":     knn_zeta["val_mse"],
+            "linear_alpha_mse": lp_a_val,
+            "linear_zeta_mse":  lp_z_val,
+            "knn_alpha_mse":    knn_a_val,
+            "knn_zeta_mse":     knn_z_val,
+        },
+        "test": {
+            "linear_alpha_mse": lp_a_test,
+            "linear_zeta_mse":  lp_z_test,
+            "knn_alpha_mse":    knn_a_test,
+            "knn_zeta_mse":     knn_z_test,
         },
     }
-    if test_results:
-        payload["test"] = test_results
-
     out_path = os.path.join(
         os.path.dirname(args.checkpoint),
-        f"eval_{os.path.splitext(os.path.basename(args.checkpoint))[0]}.json"
+        f"eval_{os.path.splitext(os.path.basename(args.checkpoint))[0]}.json",
     )
     with open(out_path, "w") as f:
         json.dump(payload, f, indent=2)
-    print(f"\nsaved results → {out_path}")
+    print(f"\nSaved results → {out_path}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", type=str, required=True)
-    parser.add_argument("--test", action="store_true", help="Also evaluate on test set")
     args = parser.parse_args()
-    evaluate(args, CONFIG)
+    main(args, CONFIG)
