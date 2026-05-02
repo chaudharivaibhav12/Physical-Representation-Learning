@@ -36,8 +36,6 @@ singularity exec --bind /scratch --nv \
       --data-dir /scratch/sb10583/data/data \
       --batch-size 32 \
       --stride 2 \
-      --knn-k 20 \
-      --out $OUT_DIR/eval_results.npy \
     2>&1 | tee $OUT_DIR/eval_results.txt
   "
 

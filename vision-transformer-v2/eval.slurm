@@ -23,8 +23,13 @@ singularity exec --bind /scratch --nv \
     conda activate base
     cd /scratch/sb10583/Physical-Representation-Learning/vicreg-sarvesh-v4
 
+    if [ -f "$CKPT_DIR/best.pt" ]; then
+      echo '=== best.pt ===' | tee $OUT_DIR/best_eval.txt
+      python evaluate.py --checkpoint $CKPT_DIR/best.pt 2>&1 | tee -a $OUT_DIR/best_eval.txt
+    fi
+
     echo '=== latest.pt ===' | tee $OUT_DIR/latest_eval.txt
-    python evaluate.py --checkpoint $CKPT_DIR/latest.pt --test 2>&1 | tee -a $OUT_DIR/latest_eval.txt
+    python evaluate.py --checkpoint $CKPT_DIR/latest.pt 2>&1 | tee -a $OUT_DIR/latest_eval.txt
   "
 
 echo "Eval complete. Results in $OUT_DIR"
