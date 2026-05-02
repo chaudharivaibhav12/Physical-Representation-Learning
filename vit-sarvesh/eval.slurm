@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=vit_jepa_eval
-#SBATCH --account=csci_ga_2572-2026sp
+#SBATCH --account=csci_3033_109-2026sp
 #SBATCH --partition=n1s8-t4-1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1

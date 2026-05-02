@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=videomae_sarvesh_v1
-#SBATCH --account=csci_ga_2572-2026sp
+#SBATCH --account=csci_3033_109-2026sp
 #SBATCH --partition=c12m85-a100-1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
