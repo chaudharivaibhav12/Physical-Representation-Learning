@@ -33,7 +33,7 @@ singularity exec --nv --overlay /scratch/vc2836/overlay-physrep-2.ext3:rw \
         python -u train.py --config config.yaml \
             $RESUME_FLAG \
             experiment_group="activematter-conv-ema" \
-            train.num_epochs=50 \
+            train.num_epochs=100 \
             train.batch_size=8 \
             train.num_workers=4 \
             train.target_global_batch_size=128 \
