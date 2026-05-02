@@ -23,17 +23,15 @@ singularity exec --bind /scratch --nv \
     conda activate base
     cd /scratch/sb10583/Physical-Representation-Learning/vit-sarvesh
 
-    echo '=== best.pt (valid) ===' | tee $OUT_DIR/best_eval.txt
-    python eval.py --checkpoint $CKPT_DIR/best.pt --split valid 2>&1 | tee -a $OUT_DIR/best_eval.txt
+    if [ -f "$CKPT_DIR/best.pt" ]; then
+      echo '=== best.pt ===' | tee $OUT_DIR/best_eval.txt
+      python eval.py --checkpoint $CKPT_DIR/best.pt \
+        --out $OUT_DIR/eval_best.json 2>&1 | tee -a $OUT_DIR/best_eval.txt
+    fi
 
-    echo '=== best.pt (test) ===' | tee $OUT_DIR/best_eval_test.txt
-    python eval.py --checkpoint $CKPT_DIR/best.pt --split test 2>&1 | tee -a $OUT_DIR/best_eval_test.txt
-
-    echo '=== latest.pt (valid) ===' | tee $OUT_DIR/latest_eval.txt
-    python eval.py --checkpoint $CKPT_DIR/latest.pt --split valid 2>&1 | tee -a $OUT_DIR/latest_eval.txt
-
-    echo '=== latest.pt (test) ===' | tee $OUT_DIR/latest_eval_test.txt
-    python eval.py --checkpoint $CKPT_DIR/latest.pt --split test 2>&1 | tee -a $OUT_DIR/latest_eval_test.txt
+    echo '=== latest.pt ===' | tee $OUT_DIR/latest_eval.txt
+    python eval.py --checkpoint $CKPT_DIR/latest.pt \
+      --out $OUT_DIR/eval_latest.json 2>&1 | tee -a $OUT_DIR/latest_eval.txt
   "
 
 echo "Eval complete. Results in $OUT_DIR"
