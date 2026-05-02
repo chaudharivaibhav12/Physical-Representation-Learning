@@ -9,6 +9,7 @@
 #SBATCH --mem=24G
 #SBATCH --time=2:00:00
 #SBATCH --output=/scratch/sb10583/logs/videomae_v1_eval_%j.log
+#SBATCH --requeue
 
 CKPT_DIR=/scratch/sb10583/checkpoints/videomae-v1
 OUT_DIR=/scratch/sb10583/eval-results/videomae-v1
