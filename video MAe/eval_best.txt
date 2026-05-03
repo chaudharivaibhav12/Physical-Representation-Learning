@@ -15,31 +15,31 @@ Extracting test embeddings...
 [eval/test] 858 samples
 
 Shapes: train=(5775, 192)  val=(792, 192)  test=(858, 192)
-Embedding std (train): 0.0971  (> 0.1 = healthy)
+Embedding std (train): 0.1003  (> 0.1 = healthy)
 
 ═══════════════════════════════════════════════════════
 LINEAR PROBE (Ridge, alpha=1.0)
 ═══════════════════════════════════════════════════════
-  Linear [alpha] → Val: 0.1146  Test: 0.1295
-  kNN    [alpha] → Val: 0.3169  Test: 0.3851
-  Linear [zeta ] → Val: 0.2288  Test: 0.1612
-  kNN    [zeta ] → Val: 0.2184  Test: 0.2243
+  Linear [alpha] → Val: 0.0790  Test: 0.0938
+  kNN    [alpha] → Val: 0.2072  Test: 0.2724
+  Linear [zeta ] → Val: 0.2184  Test: 0.1730
+  kNN    [zeta ] → Val: 0.1997  Test: 0.2370
 
 ═══════════════════════════════════════════════════════
 kNN REGRESSION (k=20, cosine)
 ═══════════════════════════════════════════════════════
-  Linear [alpha] → Val: 0.1146  Test: 0.1295
-  kNN    [alpha] → Val: 0.3169  Test: 0.3851
-  Linear [zeta ] → Val: 0.2288  Test: 0.1612
-  kNN    [zeta ] → Val: 0.2184  Test: 0.2243
+  Linear [alpha] → Val: 0.0790  Test: 0.0938
+  kNN    [alpha] → Val: 0.2072  Test: 0.2724
+  Linear [zeta ] → Val: 0.2184  Test: 0.1730
+  kNN    [zeta ] → Val: 0.1997  Test: 0.2370
 
 ═══════════════════════════════════════════════════════
 SUMMARY  (MSE on z-score normalized targets)
 ═══════════════════════════════════════════════════════
-  Linear Probe — alpha:  Val 0.1146  Test 0.1295
-  Linear Probe — zeta:   Val 0.2288  Test 0.1612
-  kNN          — alpha:  Val 0.3169  Test 0.3851
-  kNN          — zeta:   Val 0.2184  Test 0.2243
+  Linear Probe — alpha:  Val 0.0790  Test 0.0938
+  Linear Probe — zeta:   Val 0.2184  Test 0.1730
+  kNN          — alpha:  Val 0.2072  Test 0.2724
+  kNN          — zeta:   Val 0.1997  Test 0.2370
 
   Lower is better.  Random baseline ≈ 1.0 (normalized)
 

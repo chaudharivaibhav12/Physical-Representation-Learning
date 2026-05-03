@@ -4,17 +4,17 @@
   "train_samples": 5775,
   "val_samples": 792,
   "test_samples": 858,
-  "embedding_std": 0.09714195132255554,
+  "embedding_std": 0.1003,
   "val": {
-    "linear_alpha_mse": 0.11461063474416733,
-    "linear_zeta_mse": 0.2287525236606598,
-    "knn_alpha_mse": 0.3169104754924774,
-    "knn_zeta_mse": 0.21835385262966156
+    "linear_alpha_mse": 0.0790,
+    "linear_zeta_mse": 0.2184,
+    "knn_alpha_mse": 0.2072,
+    "knn_zeta_mse": 0.1997
   },
   "test": {
-    "linear_alpha_mse": 0.12946195900440216,
-    "linear_zeta_mse": 0.1612369567155838,
-    "knn_alpha_mse": 0.3851395845413208,
-    "knn_zeta_mse": 0.22425425052642822
+    "linear_alpha_mse": 0.0938,
+    "linear_zeta_mse": 0.1730,
+    "knn_alpha_mse": 0.2724,
+    "knn_zeta_mse": 0.2370
   }
 }

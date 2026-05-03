@@ -96,7 +96,7 @@ Targets (α, ζ) are z-score normalized. MSE reported on val and test sets. Rand
 | VICReg ViT v1 (20ep) | 23.6M | 0.553 | 0.744 | 0.704 | 0.961 | 0.091 ⚠️ |
 | **VICReg ViT v2 (100ep)** | 23.6M | **0.063** | **0.219** | **0.085** | **0.286** | 0.366 ✓ |
 | ViT-JEPA sarvesh | 6.85M | 0.101 | 0.282 | 0.317 | 0.337 | 0.314 ✓ |
-| VideoMAE | 6.4M | 0.129 | 0.161 | 0.385 | 0.224 | 0.097 ⚠️ |
+| VideoMAE | 6.4M | 0.094 | 0.173 | 0.272 | 0.237 | 0.100 ✓ |
 
 Lower is better. Random baseline ≈ 1.0.
 
