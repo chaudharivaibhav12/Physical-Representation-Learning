@@ -1,0 +1,48 @@
+=== best.pt ===
+Device: cuda
+
+Loaded checkpoint: /scratch/sb10583/checkpoints/vit-jepa-sarvesh/best.pt  [encoder frozen]
+
+═══════════════════════════════════════════════════════
+EXTRACTING EMBEDDINGS
+═══════════════════════════════════════════════════════
+Extracting train embeddings...
+[train] Found 45 files
+[train] Total samples: 11550
+Extracting val embeddings...
+[valid] Found 16 files
+[valid] Total samples: 1584
+Extracting test embeddings...
+[test] Found 21 files
+[test] Total samples: 1716
+
+Shapes: train=(11550, 256)  val=(1584, 256)  test=(1716, 256)
+Embedding std (train): 0.3145  (> 0.1 = healthy)
+
+═══════════════════════════════════════════════════════
+LINEAR PROBE (Ridge, alpha=1.0)
+═══════════════════════════════════════════════════════
+  Linear [alpha] → Val: 0.0753  Test: 0.1009
+  kNN    [alpha] → Val: 0.2199  Test: 0.3171
+  Linear [zeta ] → Val: 0.3122  Test: 0.2823
+  kNN    [zeta ] → Val: 0.3625  Test: 0.3365
+
+═══════════════════════════════════════════════════════
+kNN REGRESSION (k=20, cosine)
+═══════════════════════════════════════════════════════
+  Linear [alpha] → Val: 0.0753  Test: 0.1009
+  kNN    [alpha] → Val: 0.2199  Test: 0.3171
+  Linear [zeta ] → Val: 0.3122  Test: 0.2823
+  kNN    [zeta ] → Val: 0.3625  Test: 0.3365
+
+═══════════════════════════════════════════════════════
+SUMMARY  (MSE on z-score normalized targets)
+═══════════════════════════════════════════════════════
+  Linear Probe — alpha:  Val 0.0753  Test 0.1009
+  Linear Probe — zeta:   Val 0.3122  Test 0.2823
+  kNN          — alpha:  Val 0.2199  Test 0.3171
+  kNN          — zeta:   Val 0.3625  Test 0.3365
+
+  Lower is better.  Random baseline ≈ 1.0 (normalized)
+
+Saved results → /scratch/sb10583/eval-results/vit-jepa-sarvesh/eval_best.json
