@@ -1,0 +1,121 @@
+{
+    "job_id": "181788",
+    "device": "cpu",
+    "checkpoint": "/scratch/ok2287/checkpoints/vit_jepa_patch16_stride4/best.pt",
+    "epoch_loaded": 38,
+    "dataset_statistics": {
+        "train": {
+            "files": 45,
+            "samples": 2275
+        },
+        "valid": {
+            "files": 16,
+            "samples": 312
+        },
+        "test": {
+            "files": 21,
+            "samples": 338
+        }
+    },
+    "embeddings": {
+        "dim": 384,
+        "std_avg": {
+            "train": 0.3327,
+            "val": 0.3294,
+            "test": 0.3297
+        }
+    },
+    "collapse_check": {
+        "status": "HEALTHY",
+        "avg_std": 0.3327,
+        "min_std": 0.215,
+        "dead_dims": 0
+    },
+    "linear_probe_training": {
+        "alpha": [
+            {
+                "epoch": 20,
+                "train_mse": 0.8798,
+                "val_mse": 0.6486
+            },
+            {
+                "epoch": 40,
+                "train_mse": 0.8471,
+                "val_mse": 0.6385
+            },
+            {
+                "epoch": 60,
+                "train_mse": 0.8457,
+                "val_mse": 0.6338
+            },
+            {
+                "epoch": 80,
+                "train_mse": 0.836,
+                "val_mse": 0.6687
+            },
+            {
+                "epoch": 100,
+                "train_mse": 0.8365,
+                "val_mse": 0.6248
+            }
+        ],
+        "zeta": [
+            {
+                "epoch": 20,
+                "train_mse": 0.9123,
+                "val_mse": 0.7643
+            },
+            {
+                "epoch": 40,
+                "train_mse": 0.8892,
+                "val_mse": 0.7498
+            },
+            {
+                "epoch": 60,
+                "train_mse": 0.8836,
+                "val_mse": 0.7438
+            },
+            {
+                "epoch": 80,
+                "train_mse": 0.8729,
+                "val_mse": 0.7335
+            },
+            {
+                "epoch": 100,
+                "train_mse": 0.8654,
+                "val_mse": 0.726
+            }
+        ]
+    },
+    "final_summary": [
+        {
+            "method": "Linear Probe",
+            "target": "alpha",
+            "train": 0.8449,
+            "val": 0.6183,
+            "test": 0.6183
+        },
+        {
+            "method": "Linear Probe",
+            "target": "zeta",
+            "train": 0.8574,
+            "val": 0.7172,
+            "test": 0.8025
+        },
+        {
+            "method": "kNN (k=20)",
+            "target": "alpha",
+            "train": 0.841,
+            "val": 0.686,
+            "test": 0.7434
+        },
+        {
+            "method": "kNN (k=20)",
+            "target": "zeta",
+            "train": 0.8747,
+            "val": 0.8422,
+            "test": 0.9364
+        }
+    ],
+    "normalization_notes": "MSE on z-score normalized targets. Random baseline \u2248 1.0 | Perfect = 0.0"
+}
