@@ -1,0 +1,20 @@
+{
+  "model": "vit-jepa-sarvesh",
+  "checkpoint": "/scratch/sb10583/checkpoints/vit-jepa-sarvesh/best.pt",
+  "train_samples": 11550,
+  "val_samples": 1584,
+  "test_samples": 1716,
+  "embedding_std": 0.31448304653167725,
+  "val": {
+    "linear_alpha_mse": 0.07533430308103561,
+    "linear_zeta_mse": 0.31217262148857117,
+    "knn_alpha_mse": 0.21986809372901917,
+    "knn_zeta_mse": 0.36247020959854126
+  },
+  "test": {
+    "linear_alpha_mse": 0.10089271515607834,
+    "linear_zeta_mse": 0.28226420283317566,
+    "knn_alpha_mse": 0.3171294629573822,
+    "knn_zeta_mse": 0.3365110158920288
+  }
+}

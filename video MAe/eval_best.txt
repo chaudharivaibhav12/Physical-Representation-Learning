@@ -1,0 +1,46 @@
+Device: cuda
+
+Loading checkpoint: /scratch/sb10583/checkpoints/videomae-v1/best.pt
+Loaded checkpoint: /scratch/sb10583/checkpoints/videomae-v1/best.pt  [encoder frozen]
+Encoder parameters: 6,420,672
+
+═══════════════════════════════════════════════════════
+EXTRACTING EMBEDDINGS
+═══════════════════════════════════════════════════════
+Extracting train embeddings...
+[eval/train] 5775 samples
+Extracting val embeddings...
+[eval/valid] 792 samples
+Extracting test embeddings...
+[eval/test] 858 samples
+
+Shapes: train=(5775, 192)  val=(792, 192)  test=(858, 192)
+Embedding std (train): 0.0971  (> 0.1 = healthy)
+
+═══════════════════════════════════════════════════════
+LINEAR PROBE (Ridge, alpha=1.0)
+═══════════════════════════════════════════════════════
+  Linear [alpha] → Val: 0.1146  Test: 0.1295
+  kNN    [alpha] → Val: 0.3169  Test: 0.3851
+  Linear [zeta ] → Val: 0.2288  Test: 0.1612
+  kNN    [zeta ] → Val: 0.2184  Test: 0.2243
+
+═══════════════════════════════════════════════════════
+kNN REGRESSION (k=20, cosine)
+═══════════════════════════════════════════════════════
+  Linear [alpha] → Val: 0.1146  Test: 0.1295
+  kNN    [alpha] → Val: 0.3169  Test: 0.3851
+  Linear [zeta ] → Val: 0.2288  Test: 0.1612
+  kNN    [zeta ] → Val: 0.2184  Test: 0.2243
+
+═══════════════════════════════════════════════════════
+SUMMARY  (MSE on z-score normalized targets)
+═══════════════════════════════════════════════════════
+  Linear Probe — alpha:  Val 0.1146  Test 0.1295
+  Linear Probe — zeta:   Val 0.2288  Test 0.1612
+  kNN          — alpha:  Val 0.3169  Test 0.3851
+  kNN          — zeta:   Val 0.2184  Test 0.2243
+
+  Lower is better.  Random baseline ≈ 1.0 (normalized)
+
+Saved results → /scratch/sb10583/checkpoints/videomae-v1/eval_best.json

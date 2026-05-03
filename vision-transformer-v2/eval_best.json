@@ -1,0 +1,20 @@
+{
+  "model": "vicreg-v4",
+  "checkpoint": "/scratch/sb10583/checkpoints/vicreg-v4/best.pt",
+  "train_samples": 8750,
+  "val_samples": 1200,
+  "test_samples": 1300,
+  "embedding_std": 0.3663909137248993,
+  "val": {
+    "linear_alpha_mse": 0.061523742973804474,
+    "linear_zeta_mse": 0.19466444849967957,
+    "knn_alpha_mse": 0.09066767245531082,
+    "knn_zeta_mse": 0.3013099431991577
+  },
+  "test": {
+    "linear_alpha_mse": 0.06292590498924255,
+    "linear_zeta_mse": 0.21912860870361328,
+    "knn_alpha_mse": 0.08497785776853561,
+    "knn_zeta_mse": 0.28554418683052063
+  }
+}

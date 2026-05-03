@@ -1,0 +1,20 @@
+{
+  "model": "videomae-v1",
+  "checkpoint": "/scratch/sb10583/checkpoints/videomae-v1/best.pt",
+  "train_samples": 5775,
+  "val_samples": 792,
+  "test_samples": 858,
+  "embedding_std": 0.09714195132255554,
+  "val": {
+    "linear_alpha_mse": 0.11461063474416733,
+    "linear_zeta_mse": 0.2287525236606598,
+    "knn_alpha_mse": 0.3169104754924774,
+    "knn_zeta_mse": 0.21835385262966156
+  },
+  "test": {
+    "linear_alpha_mse": 0.12946195900440216,
+    "linear_zeta_mse": 0.1612369567155838,
+    "knn_alpha_mse": 0.3851395845413208,
+    "knn_zeta_mse": 0.22425425052642822
+  }
+}

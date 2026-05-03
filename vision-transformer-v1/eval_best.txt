@@ -1,0 +1,45 @@
+=== best.pt ===
+Device: cuda
+
+Loaded checkpoint: /scratch/sb10583/checkpoints/vicreg-v2/best.pt  [encoder frozen]
+
+═══════════════════════════════════════════════════════
+EXTRACTING EMBEDDINGS
+═══════════════════════════════════════════════════════
+Extracting train embeddings...
+[eval/train] 8750 samples
+Extracting val embeddings...
+[eval/valid] 1200 samples
+Extracting test embeddings...
+[eval/test] 1300 samples
+
+Shapes: train=(8750, 384)  val=(1200, 384)  test=(1300, 384)
+Embedding std (train): 0.0911  (> 0.1 = healthy)
+
+═══════════════════════════════════════════════════════
+LINEAR PROBE (Ridge, alpha=1.0)
+═══════════════════════════════════════════════════════
+  Linear [alpha] → Val: 0.4687  Test: 0.5531
+  kNN    [alpha] → Val: 0.6833  Test: 0.7043
+  Linear [zeta ] → Val: 0.6662  Test: 0.7441
+  kNN    [zeta ] → Val: 0.8732  Test: 0.9609
+
+═══════════════════════════════════════════════════════
+kNN REGRESSION (k=20, cosine)
+═══════════════════════════════════════════════════════
+  Linear [alpha] → Val: 0.4687  Test: 0.5531
+  kNN    [alpha] → Val: 0.6833  Test: 0.7043
+  Linear [zeta ] → Val: 0.6662  Test: 0.7441
+  kNN    [zeta ] → Val: 0.8732  Test: 0.9609
+
+═══════════════════════════════════════════════════════
+SUMMARY  (MSE on z-score normalized targets)
+═══════════════════════════════════════════════════════
+  Linear Probe — alpha:  Val 0.4687  Test 0.5531
+  Linear Probe — zeta:   Val 0.6662  Test 0.7441
+  kNN          — alpha:  Val 0.6833  Test 0.7043
+  kNN          — zeta:   Val 0.8732  Test 0.9609
+
+  Lower is better.  Random baseline ≈ 1.0 (normalized)
+
+Saved results → /scratch/sb10583/checkpoints/vicreg-v2/eval_best.json
